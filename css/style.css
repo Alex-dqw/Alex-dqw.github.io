@@ -1,8 +1,40 @@
+body {
+    background-repeat: no-repeat;
+    background-position: top;
+    background-image: url(../background.jpg);
+    max-width: 100%;
+    min-height: 100%;
+}
 .preblock {
+    display: block;
+    margin: 0 auto;
+    padding-left: 40px;
+    padding-right: 40px;
+    padding-top: 10px;
+    padding-bottom: 20px;
+    background: #fff;
+    border-radius: 10px;
+    width: 280px;
+    min-height: 160px;
     position: relative;
     top: 20px;
     text-align: center;
 }
-.preblock img {
-    max-width: 100%;
+.preblockTitle {
+    color: #000;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+.preblockFirst {
+    color: #000;
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 1.2;
+}
+.preblockSecond {
+    color: #000;
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 1.2;
 }
