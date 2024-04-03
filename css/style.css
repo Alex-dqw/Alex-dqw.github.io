@@ -8,16 +8,17 @@ body {
 .preblock {
     display: block;
     margin: 0 auto;
-    padding-left: 40px;
-    padding-right: 40px;
+    padding-left: 30px;
+    padding-right: 30px;
     padding-top: 10px;
     padding-bottom: 20px;
     background: #fff;
     border-radius: 10px;
-    width: 280px;
+    width: 260px;
     min-height: 160px;
-    position: relative;
-    top: 20px;
+    position: absolute;
+    top: 40%;
+    left: calc(50% - 260px + 100px);
     text-align: center;
 }
 .preblockTitle {
