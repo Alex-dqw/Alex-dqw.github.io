@@ -1,1 +1,142 @@
-*{box-sizing:border-box}.rootblock{width:100%;height:100%;position:absolute;top:0;left:0}body{background-repeat:no-repeat;background-position:top;background-image:url("../img/background.jpg");background-color:#000;background-size:cover;max-width:100%;max-height:100%;width:100%;height:100%}.preblock{display:block;margin:0 auto;padding:10px 30px 20px;background:#fff;border-radius:10px;max-width:300px;height:220px;position:absolute;top:calc(50% - 220px);left:calc(50% - 240px + 100px);text-align:center;z-index:10;width:100%}.preblockTitle{color:#000;font-size:18px;font-weight:700;line-height:1.2}.preblockFirst{color:#000;font-size:16px;font-weight:400;line-height:1.2}.preblockSecond{display:block;color:#000;font-size:16px;font-weight:400;line-height:1.2;animation:textmove 2s infinite}@keyframes textmove{from{font-size:15px}50%{font-size:17px}to{font-size:15px}}.buttonArrow{position:absolute;top:10px;right:10px;background-repeat:no-repeat;background-position:top;background-image:url("../img/arrow.png");background-size:contain;width:100px;height:100px;z-index:1;animation:arrowmove 1s infinite}@keyframes arrowmove{from{top:40px}50%{top:60px}to{top:40px}}@media (max-width: 600px){.preblock{top:calc(50% - 110px)}.buttonArrow{right:0}@keyframes arrowmove{from{top:20px}50%{top:40px}to{top:20px}}}@media (max-width: 350px){.preblock{height:240px;max-width:200px;padding-left:10px;padding-right:10px;top:calc(50% - 120px);left:calc(50% - 200px + 100px)}.preblockTitle{margin-top:5px}.buttonArrow{right:0}@keyframes arrowmove{from{top:20px}50%{top:40px}to{top:20px}}}*{box-sizing:border-box}.rootblock{width:100%;height:100%;position:absolute;top:0;left:0}body{background-repeat:no-repeat;background-position:top;background-image:url("../img/background.jpg");background-color:#000;background-size:cover;max-width:100%;max-height:100%;width:100%;height:100%}.preblock{display:block;margin:0 auto;padding:10px 30px 20px;background:#fff;border-radius:10px;max-width:300px;height:220px;position:absolute;top:calc(50% - 220px);left:calc(50% - 240px + 100px);text-align:center;z-index:10;width:100%}.preblockTitle{color:#000;font-size:18px;font-weight:700;line-height:1.2}.preblockFirst{color:#000;font-size:16px;font-weight:400;line-height:1.2}.preblockSecond{display:block;color:#000;font-size:16px;font-weight:400;line-height:1.2;animation:textmove 2s infinite}@keyframes textmove{from{font-size:15px}50%{font-size:17px}to{font-size:15px}}.buttonArrow{position:absolute;top:10px;right:10px;background-repeat:no-repeat;background-position:top;background-image:url("../img/arrow.png");background-size:contain;width:100px;height:100px;z-index:1;animation:arrowmove 1s infinite}@keyframes arrowmove{from{top:40px}50%{top:60px}to{top:40px}}@media (max-width: 600px){.preblock{top:calc(50% - 110px)}.buttonArrow{right:0}@keyframes arrowmove{from{top:20px}50%{top:40px}to{top:20px}}}@media (max-width: 350px){.preblock{height:240px;max-width:200px;padding-left:10px;padding-right:10px;top:calc(50% - 120px);left:calc(50% - 200px + 100px)}.preblockTitle{margin-top:5px}.buttonArrow{right:0}@keyframes arrowmove{from{top:20px}50%{top:40px}to{top:20px}}}
+* {
+    box-sizing: border-box;
+}
+.rootblock {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+body {
+    background-repeat: no-repeat;
+    background-position: top;
+    background-image: url(../img/background.jpg);
+    background-color: #000;
+    background-size: cover;
+    max-width: 100%;
+    max-height: 100%;
+    width: 100%;
+    height: 100%;
+}
+.preblock {
+    display: block;
+    margin: 0 auto;
+    padding-left: 30px;
+    padding-right: 30px;
+    padding-top: 10px;
+    padding-bottom: 20px;
+    background: #fff;
+    border-radius: 10px;
+    max-width: 300px;
+    height: 220px;
+    position: absolute;
+    top: calc(50% - 220px);
+    left: calc(50% - 240px + 100px);
+    text-align: center;
+    z-index: 10;
+    width: 100%;
+}
+.preblockTitle {
+    color: #000;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+.preblockFirst {
+    color: #000;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.2;
+}
+.preblockSecond {
+    display: block;
+    color: #000;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.2;
+    animation: textmove 2s infinite;
+}
+@keyframes textmove {
+    from {
+        font-size: 15px;
+    }
+    50% {
+        font-size: 17px;
+    }
+    to {
+        font-size: 15px;
+    }
+}
+.buttonArrow {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-repeat: no-repeat;
+    background-position: top;
+    background-image: url(../img/arrow.png);
+    background-size: contain;
+    width: 100px;
+    height: 100px;
+    z-index: 1;
+    animation: arrowmove 1s infinite;
+}
+@keyframes arrowmove {
+    from {
+        top: 40px;
+    }
+    50% {
+        top: 60px;
+    }
+    to {
+        top: 40px;
+    }
+}
+@media (max-width: 600px) {
+    .preblock {
+        max-width: 260px;
+        top: calc(50% - 110px);
+    }
+    .buttonArrow {
+        right: 0px;
+    }
+    @keyframes arrowmove {
+        from {
+            top: 20px;
+        }
+        50% {
+            top: 40px;
+        }
+        to {
+            top: 20px;
+        }
+    }
+}
+@media (max-width: 350px) {
+    .preblock {
+        height: 240px;
+        max-width: 200px;
+        padding-left: 10px;
+        padding-right: 10px;
+        top: calc(50% - 120px);
+        left: calc(50% - 200px + 100px);
+    }
+    .preblockTitle {
+        margin-top: 5px;
+    }
+    .buttonArrow {
+        right: 0px;
+    }
+    @keyframes arrowmove {
+        from {
+            top: 20px;
+        }
+        50% {
+            top: 40px;
+        }
+        to {
+            top: 20px;
+        }
+    }
+}
+
