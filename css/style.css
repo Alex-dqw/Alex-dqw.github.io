@@ -50,6 +50,7 @@ body {
     line-height: 1.2;
 }
 .preblockSecond {
+    min-width: 240px;
     display: block;
     color: #000;
     font-size: 16px;
@@ -136,6 +137,17 @@ body {
         }
         to {
             top: 20px;
+        }
+    }
+    @keyframes textmove {
+        from {
+            font-size: 14px;
+        }
+        50% {
+            font-size: 16px;
+        }
+        to {
+            font-size: 14px;
         }
     }
 }
