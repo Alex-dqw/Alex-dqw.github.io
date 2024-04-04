@@ -124,6 +124,14 @@ body {
     }
     .preblockTitle {
         margin-top: 5px;
+        font-size: 14px;
+    }
+    .preblockFirst {
+        font-size: 14px;
+    }
+    .preblockSecond {
+        min-width: 180px;
+        font-size: 14px;
     }
     .buttonArrow {
         right: 0px;
