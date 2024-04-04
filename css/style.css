@@ -44,6 +44,7 @@ body {
     line-height: 1.2;
 }
 .preblockFirst {
+    min-width: 220px;
     color: #000;
     font-size: 16px;
     font-weight: 400;
@@ -138,6 +139,7 @@ body {
         font-size: 14px;
     }
     .preblockFirst {
+        min-width: 190px;
         font-size: 14px;
     }
     .preblockSecond {
