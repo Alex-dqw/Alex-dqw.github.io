@@ -20,8 +20,12 @@
         <div class="buttonArrow"></div>
         <script>
             $(document).ready(function() {
-                const userAgent = navigator.userAgent;
+                const userAgent = navigator.userAgent.toLowerCase();
                 console.log(userAgent);
+
+                if(userAgent.includes("wv")) {
+                    alert("TEST!");
+                }
                 // document.location.href = "https://google.com.ua"; // Переходим по ссылке.
             });
         </script>
