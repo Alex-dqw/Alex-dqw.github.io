@@ -98,6 +98,8 @@ body {
     .preblock {
         max-width: 260px;
         top: calc(50% - 110px);
+        padding-left: 15px;
+        padding-right: 15px;
     }
     .buttonArrow {
         right: 0px;
