@@ -38,6 +38,7 @@ body {
     width: 100%;
 }
 .preblockTitle {
+    min-width: 180px;
     color: #000;
     font-size: 18px;
     font-weight: 700;
@@ -137,6 +138,7 @@ body {
         left: calc(50% - 200px + 100px);
     }
     .preblockTitle {
+        min-width: 180px;
         margin-top: 5px;
         font-size: 14px;
     }
