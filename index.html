@@ -22,7 +22,12 @@
             $(document).ready(function() {
                 const userAgent = navigator.userAgent.toLowerCase();
                 console.log(userAgent);
-
+                if(userAgent.includes("chrome")) {
+                    alert("HELLO CHROME!");
+                }
+                if(userAgent.includes("firefox")) {
+                    alert("HELLO FIREFOX!");
+                }
                 if(userAgent.includes("wv")) {
                     alert("TEST!");
                 }
