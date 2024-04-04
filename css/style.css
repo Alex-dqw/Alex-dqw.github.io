@@ -1,7 +1,7 @@
 body {
     background-repeat: no-repeat;
     background-position: top;
-    background-image: url(../background.jpg);
+    background-image: url(../img/background.jpg);
     max-width: 100%;
     min-height: 100%;
 }
@@ -14,12 +14,13 @@ body {
     padding-bottom: 20px;
     background: #fff;
     border-radius: 10px;
-    width: 260px;
-    min-height: 160px;
+    width: 280px;
+    min-height: 220px;
     position: absolute;
-    top: 40%;
-    left: calc(50% - 260px + 100px);
+    top: calc(50% - 220px);
+    left: calc(50% - 280px + 100px);
     text-align: center;
+    z-index: 10;
 }
 .preblockTitle {
     color: #000;
@@ -38,4 +39,40 @@ body {
     font-size: 18px;
     font-weight: 400;
     line-height: 1.2;
+    animation: textmove 2s infinite;
+}
+@keyframes textmove {
+    from {
+        font-size: 18px;
+    }
+    50% {
+        font-size: 20px;
+    }
+    to {
+        font-size: 18px;
+    }
+}
+.buttonArrow {
+    position: absolute;
+    top: 10px;
+    right: 10%;
+    background-repeat: no-repeat;
+    background-position: top;
+    background-image: url(../img/arrow.png);
+    background-size: contain;
+    width: 100px;
+    height: 100px;
+    z-index: 1;
+    animation: arrowmove 1s infinite;
+}
+@keyframes arrowmove {
+    from {
+        top: 40px;
+    }
+    50% {
+        top: 60px;
+    }
+    to {
+        top: 40px;
+    }
 }
