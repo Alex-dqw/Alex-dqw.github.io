@@ -112,6 +112,17 @@ body {
             top: 20px;
         }
     }
+    @keyframes textmove {
+        from {
+            font-size: 14px;
+        }
+        50% {
+            font-size: 16px;
+        }
+        to {
+            font-size: 14px;
+        }
+    }
 }
 @media (max-width: 350px) {
     .preblock {
@@ -130,7 +141,7 @@ body {
         font-size: 14px;
     }
     .preblockSecond {
-        min-width: 180px;
+        min-width: 190px;
         font-size: 14px;
     }
     .buttonArrow {
@@ -149,13 +160,13 @@ body {
     }
     @keyframes textmove {
         from {
-            font-size: 14px;
+            font-size: 12px;
         }
         50% {
-            font-size: 16px;
+            font-size: 13px;
         }
         to {
-            font-size: 14px;
+            font-size: 12px;
         }
     }
 }
