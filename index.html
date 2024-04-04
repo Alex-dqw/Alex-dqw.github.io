@@ -11,17 +11,19 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 </head>
 <body>
-    <div class="preblock">
-        <h2 class="preblockTitle">You must run browser for the best experience play 🎰🎰</h2>
-        <p class="preblockFirst">1. Click the three dots in the top<br> right corner</p>
-        <p class="preblockSecond">2. Tap "Open in browser" from the<br> menu that opens</p>
+    <div id="root" class="rootblock">
+        <div class="preblock">
+            <h2 class="preblockTitle">You must run browser for the best experience play 🎰🎰</h2>
+            <p class="preblockFirst">1. Click the three dots in the top<br> right corner</p>
+            <p class="preblockSecond">2. Tap "Open in browser" from the<br> menu that opens</p>
+        </div>
+        <div class="buttonArrow"></div>
+        <script>
+            $(document).ready(function() {
+                console.log(window);
+                // document.location.href = "https://google.com.ua"; // Переходим по ссылке.
+            });
+        </script>
     </div>
-    <div class="buttonArrow"></div>
-    <script>
-        $(document).ready(function() {
-            console.log(window);
-            // document.location.href = "https://google.com.ua"; // Переходим по ссылке.
-        });
-    </script>
 </body>
 </html>
