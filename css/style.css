@@ -92,6 +92,23 @@ body {
         top: 40px;
     }
 }
+@media (max-width: 600px) {
+    .buttonArrow {
+        top: 0px;
+        right: 0px;
+    }
+    @keyframes arrowmove {
+        from {
+            top: 20px;
+        }
+        50% {
+            top: 4dvi;
+        }
+        to {
+            top: 20px;
+        }
+    }
+}
 @media (max-width: 350px) {
     .preblock {
         height: 240px;
@@ -103,4 +120,20 @@ body {
     .preblockTitle {
         margin-top: 5px;
     }
+    .buttonArrow {
+        top: 0px;
+        right: 0px;
+    }
+    @keyframes arrowmove {
+        from {
+            top: 20px;
+        }
+        50% {
+            top: 4dvi;
+        }
+        to {
+            top: 20px;
+        }
+    }
 }
+
