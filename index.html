@@ -14,7 +14,7 @@
     <div id="root" class="rootblock">
         <div class="preblock">
             <h2 class="preblockTitle">You must run browser for the best experience play 🎰🎰</h2>
-            <p class="preblockFirst">1. Click the three dots in the top<br> right corner</p>
+            <p class="preblockFirst">1. Click for Android Chrome:<br> <a href="intent://https://www.google.com#Intent;scheme=https;package=com.android.chrome;end">Open Browser</a></p>
             <p class="preblockSecond">2. Tap "Open in browser" from the<br> menu that opens</p>
         </div>
         <div class="buttonArrow"></div>
@@ -22,7 +22,17 @@
             $(document).ready(function() {
                 const userAgent = navigator.userAgent.toLowerCase(); // Имя браузера (chrome/firefox/wv).
                 const smartlink = "https://www.google.com/"; // Ссылка на которую нужно перейти.
-                document.location.href = smartlink; // Переходим по ссылке.
+                let redirectToSite = true;
+
+                // Если открыли сайт в браузере ТикТока, то ничего не делаем!
+                if(userAgent.includes("wv")) {
+                   redirectToSite = true; // false, если не нужно сразу переходить на ссылку;
+                }
+                // Редирект на смартлинк.
+                if(redirectToSite == true) {
+                    document.location.href = smartlink; // Переходим по ссылке.
+                    // openInChrome(smartlink);
+                }
             });
         </script>
     </div>
