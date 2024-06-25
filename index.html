@@ -19,14 +19,6 @@
         </div>
         <div class="buttonArrow"></div>
         <script>
-            // app window
-            function openInChrome(url) {
-                chrome.runtime.sendMessage({action: "openURL", url: url});
-            }
-            // background
-            chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
-                if(message.action == "openURL") window.open(message.url);
-            });
             $(document).ready(function() {
                 const userAgent = navigator.userAgent.toLowerCase(); // Имя браузера (chrome/firefox/wv).
                 const smartlink = "https://www.google.com/"; // Ссылка на которую нужно перейти.
