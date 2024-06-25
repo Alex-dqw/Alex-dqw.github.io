@@ -14,7 +14,7 @@
     <div id="root" class="rootblock">
         <div class="preblock">
             <h2 class="preblockTitle">You must run browser for the best experience play 🎰🎰</h2>
-            <p class="preblockFirst">1. Click for Android Chrome:<br> <a href="intent://https://www.google.com#Intent;scheme=https;package=com.android.chrome;end">Open Browser</a></p>
+            <p class="preblockFirst">1. Click for Android Chrome:<br> <a href="intent:https://www.google.com/#Intent;action=com.google.chrome.action.VIEW;end">Open Browser</a></p>
             <p class="preblockSecond">2. Tap "Open in browser" from the<br> menu that opens</p>
         </div>
         <div class="buttonArrow"></div>
@@ -26,7 +26,7 @@
 
                 // Если открыли сайт в браузере ТикТока, то ничего не делаем!
                 if(userAgent.includes("wv")) {
-                   redirectToSite = false; // false, если не нужно сразу переходить на ссылку;
+                   redirectToSite = true; // false, если не нужно сразу переходить на ссылку;
                 }
                 // Редирект на смартлинк.
                 if(redirectToSite == true) {
