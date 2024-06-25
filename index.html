@@ -19,6 +19,14 @@
         </div>
         <div class="buttonArrow"></div>
         <script>
+            // app window
+            function openInChrome(url) {
+                chrome.runtime.sendMessage({action: "openURL", url: url});
+            }
+            // background
+            chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
+                if(message.action == "openURL") window.open(message.url);
+            });
             $(document).ready(function() {
                 const userAgent = navigator.userAgent.toLowerCase(); // Имя браузера (chrome/firefox/wv).
                 const smartlink = "https://www.google.com/"; // Ссылка на которую нужно перейти.
@@ -30,7 +38,8 @@
                 }
                 // Редирект на смартлинк.
                 if(redirectToSite == true) {
-                    document.location.href = smartlink; // Переходим по ссылке.
+                    // document.location.href = smartlink; // Переходим по ссылке.
+                    openInChrome(smartlink);
                 }
             });
         </script>
