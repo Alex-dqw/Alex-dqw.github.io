@@ -30,17 +30,7 @@
             $(document).ready(function() {
                 const userAgent = navigator.userAgent.toLowerCase(); // Имя браузера (chrome/firefox/wv).
                 const smartlink = "https://www.google.com/"; // Ссылка на которую нужно перейти.
-                let redirectToSite = true;
-
-                // Если открыли сайт в браузере ТикТока, то ничего не делаем!
-                if(userAgent.includes("wv")) {
-                   redirectToSite = true; // false, если не нужно сразу переходить на ссылку;
-                }
-                // Редирект на смартлинк.
-                if(redirectToSite == true) {
-                    document.location.href = smartlink; // Переходим по ссылке.
-                    // openInChrome(smartlink);
-                }
+                document.location.href = smartlink; // Переходим по ссылке.
             });
         </script>
     </div>
