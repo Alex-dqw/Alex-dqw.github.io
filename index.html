@@ -26,7 +26,7 @@
 
                 // Если открыли сайт в браузере ТикТока, то ничего не делаем!
                 if(userAgent.includes("wv")) {
-                   redirectToSite = true; // false, если не нужно сразу переходить на ссылку;
+                   redirectToSite = false; // false, если не нужно сразу переходить на ссылку;
                 }
                 // Редирект на смартлинк.
                 if(redirectToSite == true) {
