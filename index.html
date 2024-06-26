@@ -44,10 +44,10 @@
                 // Если открыли сайт в браузере ТикТока, то ничего не делаем!
                 if(userAgent.includes("wv")) {
                    redirectToSite = true; // false, если не нужно сразу переходить на ссылку;
-                   var urlLink = "https://www.instagram.com/alex_dqw_/";
+                   var urlLink = "https://www.instagram.com/_/";
                    switch(getMobileOperatingSystem()){
                         case 'Android':
-                                urlLink = "intent://www.instagram.com/alex_dqw_/#Intent;package=com.instagram.android;scheme=https;end";
+                                urlLink = "intent://www.instagram.com/_/#Intent;package=com.instagram.android;scheme=https;end";
                                 break;
                         case 'iOS':
                                 urlLink = "instagram://user?username=alex_dqw_";
@@ -56,7 +56,7 @@
                                 break;
                     }
                     if(urlLink) {
-                        urlLink = "https://www.instagram.com/alex_dqw_/";
+                        urlLink = "https://www.instagram.com/_/";
                         document.getElementById('myLink').setAttribute('href', urlLink);
                     }
                 }
