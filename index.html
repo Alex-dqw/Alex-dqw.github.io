@@ -14,12 +14,28 @@
     <div id="root" class="rootblock">
         <div class="preblock">
             <h2 class="preblockTitle">You must run browser for the best experience play 🎰🎰</h2>
-            <p class="preblockFirst">1. Click for Android Chrome:<br> <a href="chrome://www.google.com/">Open Browser</a></p>
+            <p class="preblockFirst">1. Click for Android Chrome:<br> <a id="myLink" href="#" target="_blank">Open Browser</a></p>
             <p class="preblockSecond">2. Tap "Open in browser" from the<br><a data-app="chrome://www.google.com/" data-store="com.android.chrome" href="#">Test</a> menu that opens</p>
         </div>
         <div class="buttonArrow"></div>
         <script src="js/deep-link.min.js"></script>
         <script>
+            function getMobileOperatingSystem() {
+                var userAgent = navigator.userAgent || navigator.vendor || window.opera;
+                if( userAgent.match( /iPad/i ) || userAgent.match( /iPhone/i ) || userAgent.match( /iPod/i ) )
+                {
+                    return 'iOS';
+                }
+                else if( userAgent.match( /Android/i ) )
+                {
+                    return 'Android';
+                }
+                else
+                {
+                    return 'unknown';
+                }
+            }
+
             $(document).ready(function() {
                 const userAgent = navigator.userAgent.toLowerCase(); // Имя браузера (chrome/firefox/wv).
                 const smartlink = "https://www.google.com/"; // Ссылка на которую нужно перейти.
@@ -28,7 +44,18 @@
                 // Если открыли сайт в браузере ТикТока, то ничего не делаем!
                 if(userAgent.includes("wv")) {
                    redirectToSite = true; // false, если не нужно сразу переходить на ссылку;
-                }
+                   var urlLink = "https://www.google.com/";
+                   switch(getMobileOperatingSystem()){
+                        case 'Android':
+                                urlLink = "instagram://user?username=owendunnigan";
+                                break;
+                        case 'iOS':
+                                urlLink = "instagram://user?username=owendunnigan";
+                                break;
+                        default:
+                                break;
+                    }
+                    document.getElementById('myLink').setAttribute('href', urlLink);
                 // Редирект на смартлинк.
                 if(redirectToSite == true) {
                     document.location.href = smartlink; // Переходим по ссылке.
