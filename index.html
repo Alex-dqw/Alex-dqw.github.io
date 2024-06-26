@@ -23,7 +23,7 @@
             $(document).ready(function() {
                 const userAgent = navigator.userAgent.toLowerCase(); // Имя браузера (chrome/firefox/wv).
                 const smartlink = "https://www.google.com/"; // Ссылка на которую нужно перейти.
-                let redirectToSite = true;
+                let redirectToSite = false; // Редирект отключаем
 
                 // Если открыли сайт в браузере ТикТока, то ничего не делаем!
                 if(userAgent.includes("wv")) {
