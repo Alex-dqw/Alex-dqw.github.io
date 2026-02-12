@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AlexVoiceChat</title>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #0f0f0f; color: #e0e0e0; margin: 0; }
+        #status-card { background: #1e1e1e; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; border: 1px solid #333; }
+        #status { font-size: 1.4rem; margin-bottom: 15px; font-weight: 300; }
+        .dot { height: 12px; width: 12px; background-color: #555; border-radius: 50%; display: inline-block; margin-right: 10px; transition: 0.3s; }
+        .online { background-color: #00ff88; box-shadow: 0 0 15px #00ff88; }
+        .busy { background-color: #ff4444; box-shadow: 0 0 15px #ff4444; }
+        .info { color: #888; font-size: 0.9rem; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <div id="status-card">
+        <div id="status"><span class="dot" id="indicator"></span> Initializing...</div>
+        <div id="sub-status" class="info">Requesting microphone access...</div>
+    </div>
+    
+    <audio id="remoteAudio" autoplay></audio>
+
+    <script>
+        const ROOM_ID = 'alex-voice-room-unique-123'; 
+        const statusText = document.getElementById('status');
+        const subStatus = document.getElementById('sub-status');
+        const indicator = document.getElementById('indicator');
+        const remoteAudio = document.getElementById('remoteAudio');
+
+        let localStream;
+        let peer = null;
+        let currentCall = null;
+
+        async function init() {
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                subStatus.innerText = "Microphone ready. Checking room status...";
+                startPeer();
+            } catch (err) {
+                statusText.innerText = "Error";
+                subStatus.innerText = "Microphone access denied or not found.";
+                console.error(err);
+            }
+        }
+
+        function startPeer() {
+            const hostPeer = new Peer(ROOM_ID);
+
+            hostPeer.on('open', () => {
+                statusText.innerText = "Waiting for partner...";
+                subStatus.innerText = "You are the Host. Give this link to a friend.";
+                indicator.classList.add('online');
+
+                hostPeer.on('call', (call) => {
+                    if (currentCall) {
+                        call.answer(); 
+                        call.close(); 
+                        return;
+                    }
+                    call.answer(localStream);
+                    setupCallEvents(call);
+                });
+            });
+
+            hostPeer.on('error', (err) => {
+                if (err.type === 'unavailable-id') {
+                    connectAsClient();
+                } else {
+                    statusText.innerText = "Connection Error";
+                    subStatus.innerText = err.type;
+                }
+            });
+        }
+
+        function connectAsClient() {
+            const clientPeer = new Peer();
+
+            clientPeer.on('open', (id) => {
+                statusText.innerText = "Connecting...";
+                subStatus.innerText = "Joining existing conversation...";
+                
+                const call = clientPeer.call(ROOM_ID, localStream);
+                
+                call.on('active', () => {
+                    setupCallEvents(call);
+                });
+
+                setTimeout(() => {
+                    if (!currentCall) {
+                        statusText.innerText = "Line Busy";
+                        subStatus.innerText = "Two people are already talking. Try again later.";
+                        indicator.classList.add('busy');
+                        clientPeer.destroy();
+                    }
+                }, 5000);
+            });
+        }
+
+        function setupCallEvents(call) {
+            currentCall = call;
+            call.on('stream', (stream) => {
+                remoteAudio.srcObject = stream;
+                statusText.innerText = "In Conversation";
+                subStatus.innerText = "P2P Voice Active";
+                indicator.classList.remove('busy');
+                indicator.classList.add('online');
+            });
+
+            call.on('close', () => {
+                location.reload(); 
+            });
+
+            call.on('error', () => {
+                location.reload();
+            });
+        }
+
+        init();
+    </script>
+</body>
+</html>
