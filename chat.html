@@ -13,33 +13,43 @@
         .online { background-color: #00ff88; box-shadow: 0 0 15px #00ff88; }
         .busy { background-color: #ff4444; box-shadow: 0 0 15px #ff4444; }
         .info { color: #888; font-size: 0.9rem; margin-top: 10px; }
-        
-        /* New styles for the mic button */
-        #controls { margin-top: 20px; }
+
+        /* Button container and styles */
+        #controls {
+            margin-top: 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
         .mic-btn {
-            width: 60px;
-            height: 60px;
+            width: 65px;
+            height: 65px;
             border-radius: 50%;
             border: none;
             cursor: pointer;
-            background: #444;
+            background: #333;
             color: white;
-            font-size: 1.2rem;
-            transition: all 0.3s ease;
+            font-size: 1.5rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
             justify-content: center;
             outline: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
+        .mic-btn:active { transform: scale(0.9); }
         .mic-btn.active {
             background: #00ff88;
-            box-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
+            color: #000;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
         }
         .mic-btn.muted {
             background: #ff4444;
-            box-shadow: 0 0 15px rgba(255, 68, 68, 0.4);
+            color: #fff;
+            box-shadow: 0 0 20px rgba(255, 68, 68, 0.3);
         }
-        .mic-btn:hover { transform: scale(1.1); }
+        #mic-label { font-weight: bold; letter-spacing: 0.5px; }
     </style>
 </head>
 <body>
@@ -75,7 +85,7 @@
                 localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 subStatus.innerText = "Microphone ready. Checking room status...";
                 
-                // Set up mic toggle logic
+                // Add click listener for the mic button
                 micToggle.addEventListener('click', toggleMic);
                 
                 startPeer();
@@ -89,12 +99,12 @@
         function toggleMic() {
             isMuted = !isMuted;
             
-            // Toggle actual audio track
+            // Toggle local tracks
             localStream.getAudioTracks().forEach(track => {
                 track.enabled = !isMuted;
             });
 
-            // Update UI
+            // Update UI components
             if (isMuted) {
                 micToggle.classList.remove('active');
                 micToggle.classList.add('muted');
@@ -119,7 +129,7 @@
 
                 hostPeer.on('call', (call) => {
                     if (currentCall) {
-                        // If already talking, reject new incoming call
+                        // Reject extra calls if line is busy
                         call.answer(); 
                         call.close(); 
                         return;
@@ -131,7 +141,7 @@
 
             hostPeer.on('error', (err) => {
                 if (err.type === 'unavailable-id') {
-                    // If ID is taken, host exists, join as client
+                    // ID taken means room exists, join as client
                     connectAsClient();
                 } else {
                     statusText.innerText = "Connection Error";
