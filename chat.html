@@ -53,10 +53,12 @@
             hostPeer.on('open', () => {
                 statusText.innerText = "Waiting for partner...";
                 subStatus.innerText = "You are the Host. Give this link to a friend.";
+                indicator.classList.remove('busy');
                 indicator.classList.add('online');
 
                 hostPeer.on('call', (call) => {
                     if (currentCall) {
+                        // Если уже кто-то говорит, сбрасываем новый входящий
                         call.answer(); 
                         call.close(); 
                         return;
@@ -68,10 +70,12 @@
 
             hostPeer.on('error', (err) => {
                 if (err.type === 'unavailable-id') {
+                    // Если ID занят, значит хост уже есть, заходим как клиент
                     connectAsClient();
                 } else {
                     statusText.innerText = "Connection Error";
                     subStatus.innerText = err.type;
+                    console.error(err);
                 }
             });
         }
@@ -88,16 +92,16 @@
             });
 
             clientPeer.on('error', (err) => {
-                statusText.innerText = "Client Error";
-                subStatus.innerText = err.type;
+                statusText.innerText = "Line Busy";
+                subStatus.innerText = "Could not connect to host.";
+                indicator.classList.add('busy');
             });
         }
 
         function setupCallEvents(call) {
             currentCall = call;
-            
+
             call.on('stream', (stream) => {
-                console.log("Stream received");
                 remoteAudio.srcObject = stream;
                 statusText.innerText = "In Conversation";
                 subStatus.innerText = "P2P Voice Active";
@@ -106,13 +110,16 @@
             });
 
             call.on('close', () => {
-                statusText.innerText = "Call ended";
+                statusText.innerText = "Disconnected";
+                subStatus.innerText = "Call ended.";
                 indicator.classList.remove('online');
+                currentCall = null;
             });
 
             call.on('error', (err) => {
-                console.error("Call error:", err);
                 statusText.innerText = "Call Error";
+                subStatus.innerText = err.message;
+                currentCall = null;
             });
         }
 
