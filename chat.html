@@ -13,6 +13,33 @@
         .online { background-color: #00ff88; box-shadow: 0 0 15px #00ff88; }
         .busy { background-color: #ff4444; box-shadow: 0 0 15px #ff4444; }
         .info { color: #888; font-size: 0.9rem; margin-top: 10px; }
+        
+        /* New styles for the mic button */
+        #controls { margin-top: 20px; }
+        .mic-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            background: #444;
+            color: white;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            outline: none;
+        }
+        .mic-btn.active {
+            background: #00ff88;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.4);
+        }
+        .mic-btn.muted {
+            background: #ff4444;
+            box-shadow: 0 0 15px rgba(255, 68, 68, 0.4);
+        }
+        .mic-btn:hover { transform: scale(1.1); }
     </style>
 </head>
 <body>
@@ -20,6 +47,11 @@
     <div id="status-card">
         <div id="status"><span class="dot" id="indicator"></span> Initializing...</div>
         <div id="sub-status" class="info">Requesting microphone access...</div>
+        
+        <div id="controls">
+            <button id="micToggle" class="mic-btn active">🎤</button>
+            <div id="mic-label" class="info">Mic On</div>
+        </div>
     </div>
     
     <audio id="remoteAudio" autoplay></audio>
@@ -30,20 +62,49 @@
         const subStatus = document.getElementById('sub-status');
         const indicator = document.getElementById('indicator');
         const remoteAudio = document.getElementById('remoteAudio');
+        const micToggle = document.getElementById('micToggle');
+        const micLabel = document.getElementById('mic-label');
 
         let localStream;
         let peer = null;
         let currentCall = null;
+        let isMuted = false;
 
         async function init() {
             try {
                 localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 subStatus.innerText = "Microphone ready. Checking room status...";
+                
+                // Set up mic toggle logic
+                micToggle.addEventListener('click', toggleMic);
+                
                 startPeer();
             } catch (err) {
                 statusText.innerText = "Error";
                 subStatus.innerText = "Microphone access denied or not found.";
                 console.error(err);
+            }
+        }
+
+        function toggleMic() {
+            isMuted = !isMuted;
+            
+            // Toggle actual audio track
+            localStream.getAudioTracks().forEach(track => {
+                track.enabled = !isMuted;
+            });
+
+            // Update UI
+            if (isMuted) {
+                micToggle.classList.remove('active');
+                micToggle.classList.add('muted');
+                micLabel.innerText = "Mic Off";
+                micToggle.innerText = "🔇";
+            } else {
+                micToggle.classList.remove('muted');
+                micToggle.classList.add('active');
+                micLabel.innerText = "Mic On";
+                micToggle.innerText = "🎤";
             }
         }
 
@@ -58,7 +119,7 @@
 
                 hostPeer.on('call', (call) => {
                     if (currentCall) {
-                        // Если уже кто-то говорит, сбрасываем новый входящий
+                        // If already talking, reject new incoming call
                         call.answer(); 
                         call.close(); 
                         return;
@@ -70,7 +131,7 @@
 
             hostPeer.on('error', (err) => {
                 if (err.type === 'unavailable-id') {
-                    // Если ID занят, значит хост уже есть, заходим как клиент
+                    // If ID is taken, host exists, join as client
                     connectAsClient();
                 } else {
                     statusText.innerText = "Connection Error";
