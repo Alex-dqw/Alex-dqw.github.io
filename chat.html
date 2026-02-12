@@ -7,21 +7,23 @@
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #0f0f0f; color: #e0e0e0; margin: 0; }
-        #status-card { background: #1e1e1e; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; border: 1px solid #333; }
+        #status-card { background: #1e1e1e; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; border: 1px solid #333; min-width: 250px; }
         #status { font-size: 1.4rem; margin-bottom: 15px; font-weight: 300; }
         .dot { height: 12px; width: 12px; background-color: #555; border-radius: 50%; display: inline-block; margin-right: 10px; transition: 0.3s; }
         .online { background-color: #00ff88; box-shadow: 0 0 15px #00ff88; }
         .busy { background-color: #ff4444; box-shadow: 0 0 15px #ff4444; }
         .info { color: #888; font-size: 0.9rem; margin-top: 10px; }
 
-        /* Button container and styles */
+        /* Centered controls container */
         #controls {
             margin-top: 25px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 10px;
+            justify-content: center;
+            width: 100%;
         }
+        
         .mic-btn {
             width: 65px;
             height: 65px;
@@ -37,7 +39,9 @@
             justify-content: center;
             outline: none;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            margin: 0 auto; /* Ensure horizontal centering */
         }
+        
         .mic-btn:active { transform: scale(0.9); }
         .mic-btn.active {
             background: #00ff88;
@@ -49,7 +53,15 @@
             color: #fff;
             box-shadow: 0 0 20px rgba(255, 68, 68, 0.3);
         }
-        #mic-label { font-weight: bold; letter-spacing: 0.5px; }
+        
+        #mic-label { 
+            margin-top: 12px;
+            font-weight: bold; 
+            letter-spacing: 0.5px; 
+            display: block;
+            width: 100%;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -85,7 +97,7 @@
                 localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 subStatus.innerText = "Microphone ready. Checking room status...";
                 
-                // Add click listener for the mic button
+                // Mic toggle works for whoever opens this page
                 micToggle.addEventListener('click', toggleMic);
                 
                 startPeer();
@@ -99,12 +111,10 @@
         function toggleMic() {
             isMuted = !isMuted;
             
-            // Toggle local tracks
             localStream.getAudioTracks().forEach(track => {
                 track.enabled = !isMuted;
             });
 
-            // Update UI components
             if (isMuted) {
                 micToggle.classList.remove('active');
                 micToggle.classList.add('muted');
@@ -129,7 +139,6 @@
 
                 hostPeer.on('call', (call) => {
                     if (currentCall) {
-                        // Reject extra calls if line is busy
                         call.answer(); 
                         call.close(); 
                         return;
@@ -141,7 +150,6 @@
 
             hostPeer.on('error', (err) => {
                 if (err.type === 'unavailable-id') {
-                    // ID taken means room exists, join as client
                     connectAsClient();
                 } else {
                     statusText.innerText = "Connection Error";
