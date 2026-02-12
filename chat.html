@@ -84,25 +84,20 @@
                 subStatus.innerText = "Joining existing conversation...";
                 
                 const call = clientPeer.call(ROOM_ID, localStream);
-                
-                call.on('active', () => {
-                    setupCallEvents(call);
-                });
+                setupCallEvents(call);
+            });
 
-                setTimeout(() => {
-                    if (!currentCall) {
-                        statusText.innerText = "Line Busy";
-                        subStatus.innerText = "Two people are already talking. Try again later.";
-                        indicator.classList.add('busy');
-                        clientPeer.destroy();
-                    }
-                }, 5000);
+            clientPeer.on('error', (err) => {
+                statusText.innerText = "Client Error";
+                subStatus.innerText = err.type;
             });
         }
 
         function setupCallEvents(call) {
             currentCall = call;
+            
             call.on('stream', (stream) => {
+                console.log("Stream received");
                 remoteAudio.srcObject = stream;
                 statusText.innerText = "In Conversation";
                 subStatus.innerText = "P2P Voice Active";
@@ -111,11 +106,13 @@
             });
 
             call.on('close', () => {
-                location.reload(); 
+                statusText.innerText = "Call ended";
+                indicator.classList.remove('online');
             });
 
-            call.on('error', () => {
-                location.reload();
+            call.on('error', (err) => {
+                console.error("Call error:", err);
+                statusText.innerText = "Call Error";
             });
         }
 
