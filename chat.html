@@ -39,7 +39,7 @@
             justify-content: center;
             outline: none;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            margin: 0 auto; /* Ensure horizontal centering */
+            margin: 0 auto;
         }
         
         .mic-btn:active { transform: scale(0.9); }
@@ -97,7 +97,7 @@
                 localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 subStatus.innerText = "Microphone ready. Checking room status...";
                 
-                // Mic toggle works for whoever opens this page
+                // Mic toggle event for all users
                 micToggle.addEventListener('click', toggleMic);
                 
                 startPeer();
@@ -109,12 +109,15 @@
         }
 
         function toggleMic() {
+            if (!localStream) return;
+
             isMuted = !isMuted;
             
             localStream.getAudioTracks().forEach(track => {
                 track.enabled = !isMuted;
             });
 
+            // Visual UI update
             if (isMuted) {
                 micToggle.classList.remove('active');
                 micToggle.classList.add('muted');
@@ -150,6 +153,7 @@
 
             hostPeer.on('error', (err) => {
                 if (err.type === 'unavailable-id') {
+                    // ID taken - joining as client
                     connectAsClient();
                 } else {
                     statusText.innerText = "Connection Error";
