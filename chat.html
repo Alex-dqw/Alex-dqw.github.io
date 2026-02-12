@@ -14,7 +14,6 @@
         .busy { background-color: #ff4444; box-shadow: 0 0 15px #ff4444; }
         .info { color: #888; font-size: 0.9rem; margin-top: 10px; }
 
-        /* Centered controls container */
         #controls {
             margin-top: 25px;
             display: flex;
@@ -63,23 +62,24 @@
             text-align: center;
         }
 
-        /* Volume slider styles */
         .volume-container {
-            margin-top: 25px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #333;
             width: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
         .volume-container label {
-            font-size: 0.8rem;
-            color: #aaa;
+            font-size: 0.75rem;
+            color: #888;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
         }
         input[type=range] {
-            width: 80%;
+            width: 90%;
             cursor: pointer;
             accent-color: #00ff88;
         }
@@ -99,6 +99,7 @@
         <div class="volume-container">
             <label for="volumeSlider">Partner Volume: <span id="volumeValue">100</span>%</label>
             <input type="range" id="volumeSlider" min="0" max="100" value="100">
+            <div class="info" style="font-size: 0.7rem;">Tip: Use mouse wheel to adjust</div>
         </div>
     </div>
     
@@ -125,9 +126,11 @@
                 localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 subStatus.innerText = "Microphone ready. Checking room status...";
                 
-                // Event listeners
                 micToggle.addEventListener('click', toggleMic);
                 volumeSlider.addEventListener('input', updateVolume);
+                
+                // Mouse wheel support for volume slider
+                volumeSlider.addEventListener('wheel', handleVolumeWheel, { passive: false });
                 
                 startPeer();
             } catch (err) {
@@ -159,9 +162,27 @@
 
         function updateVolume() {
             const val = volumeSlider.value;
-            // remoteAudio.volume takes 0.0 to 1.0
             remoteAudio.volume = val / 100;
             volumeValue.innerText = val;
+        }
+
+        function handleVolumeWheel(e) {
+            // Prevent page scrolling when adjusting volume
+            e.preventDefault();
+            
+            const step = 5;
+            let currentVal = parseInt(volumeSlider.value);
+            
+            if (e.deltaY < 0) {
+                // Scroll up
+                currentVal = Math.min(100, currentVal + step);
+            } else {
+                // Scroll down
+                currentVal = Math.max(0, currentVal - step);
+            }
+            
+            volumeSlider.value = currentVal;
+            updateVolume();
         }
 
         function startPeer() {
