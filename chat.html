@@ -7,7 +7,7 @@
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #0f0f0f; color: #e0e0e0; margin: 0; }
-        #status-card { background: #1e1e1e; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; border: 1px solid #333; min-width: 250px; }
+        #status-card { background: #1e1e1e; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; border: 1px solid #333; min-width: 280px; }
         #status { font-size: 1.4rem; margin-bottom: 15px; font-weight: 300; }
         .dot { height: 12px; width: 12px; background-color: #555; border-radius: 50%; display: inline-block; margin-right: 10px; transition: 0.3s; }
         .online { background-color: #00ff88; box-shadow: 0 0 15px #00ff88; }
@@ -62,6 +62,27 @@
             width: 100%;
             text-align: center;
         }
+
+        /* Volume slider styles */
+        .volume-container {
+            margin-top: 25px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        .volume-container label {
+            font-size: 0.8rem;
+            color: #aaa;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        input[type=range] {
+            width: 80%;
+            cursor: pointer;
+            accent-color: #00ff88;
+        }
     </style>
 </head>
 <body>
@@ -73,6 +94,11 @@
         <div id="controls">
             <button id="micToggle" class="mic-btn active">🎤</button>
             <div id="mic-label" class="info">Mic On</div>
+        </div>
+
+        <div class="volume-container">
+            <label for="volumeSlider">Partner Volume: <span id="volumeValue">100</span>%</label>
+            <input type="range" id="volumeSlider" min="0" max="100" value="100">
         </div>
     </div>
     
@@ -86,6 +112,8 @@
         const remoteAudio = document.getElementById('remoteAudio');
         const micToggle = document.getElementById('micToggle');
         const micLabel = document.getElementById('mic-label');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volumeValue = document.getElementById('volumeValue');
 
         let localStream;
         let peer = null;
@@ -97,8 +125,9 @@
                 localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 subStatus.innerText = "Microphone ready. Checking room status...";
                 
-                // Mic toggle event for all users
+                // Event listeners
                 micToggle.addEventListener('click', toggleMic);
+                volumeSlider.addEventListener('input', updateVolume);
                 
                 startPeer();
             } catch (err) {
@@ -110,14 +139,11 @@
 
         function toggleMic() {
             if (!localStream) return;
-
             isMuted = !isMuted;
-            
             localStream.getAudioTracks().forEach(track => {
                 track.enabled = !isMuted;
             });
 
-            // Visual UI update
             if (isMuted) {
                 micToggle.classList.remove('active');
                 micToggle.classList.add('muted');
@@ -129,6 +155,13 @@
                 micLabel.innerText = "Mic On";
                 micToggle.innerText = "🎤";
             }
+        }
+
+        function updateVolume() {
+            const val = volumeSlider.value;
+            // remoteAudio.volume takes 0.0 to 1.0
+            remoteAudio.volume = val / 100;
+            volumeValue.innerText = val;
         }
 
         function startPeer() {
@@ -153,7 +186,6 @@
 
             hostPeer.on('error', (err) => {
                 if (err.type === 'unavailable-id') {
-                    // ID taken - joining as client
                     connectAsClient();
                 } else {
                     statusText.innerText = "Connection Error";
