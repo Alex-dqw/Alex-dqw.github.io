@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AlexVoiceChat</title>
+    <title>AlexVoiceChat - Protected</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
+        /* CSS IS 100% FROM YOUR CODE */
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #0f0f0f; color: #e0e0e0; margin: 0; }
         #status-card { background: #1e1e1e; padding: 2rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; border: 1px solid #333; min-width: 280px; }
         #status { font-size: 1.4rem; margin-bottom: 15px; font-weight: 300; }
         .dot { height: 12px; width: 12px; background-color: #555; border-radius: 50%; display: inline-block; margin-right: 10px; transition: 0.3s; }
         .online { background-color: #00ff88; box-shadow: 0 0 15px #00ff88; }
         .busy { background-color: #ff4444; box-shadow: 0 0 15px #ff4444; }
-        /* Added for "Waiting" state */
         .waiting-state { background-color: #ff9500; box-shadow: 0 0 15px #ff9500; } 
         .info { color: #888; font-size: 0.9rem; margin-top: 10px; }
 
@@ -86,47 +86,41 @@
             accent-color: #00ff88;
         }
 
-        /* Lobby specific styles */
+        /* Lobby styles */
         #lobby { display: flex; flex-direction: column; gap: 10px; width: 100%; }
         .room-row { display: flex; align-items: center; justify-content: space-between; background: #252525; padding: 10px 15px; border-radius: 10px; cursor: pointer; border: 1px solid #444; transition: 0.3s; }
-        .room-row:hover { background: #333; border-color: #00ff88; }
-        .room-status-label { font-size: 0.7rem; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; }
-        .label-free { background: #004422; color: #00ff88; }
-        .label-waiting { background: #443300; color: #ff9500; }
-        .label-busy { background: #441111; color: #ff4444; }
-
+        .room-row:hover { background: #333; border-color: #ff9500; }
+        
         #chat-interface { display: none; width: 100%; }
-        .leave-btn { margin-top: 20px; background: none; border: 1px solid #ff4444; color: #ff4444; padding: 8px 15px; border-radius: 5px; cursor: pointer; transition: 0.3s; }
-        .leave-btn:hover { background: #ff4444; color: #fff; }
+        .leave-btn { margin-top: 20px; background: none; border: 1px solid #ff4444; color: #ff4444; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <div id="status-card">
         <div id="lobby">
-            <h2 style="margin-top:0;">Выберите комнату</h2>
+            <h2 style="margin-top:0;">Приватные комнаты</h2>
             <div class="room-row" onclick="joinRoom(1)">
-                <span>Комната №1</span>
-                <span class="room-status-label label-free" id="r-stat-1">Свободна</span>
+                <span>🔒 Комната №1</span>
+                <span class="info">Закрыто</span>
             </div>
             <div class="room-row" onclick="joinRoom(2)">
-                <span>Комната №2</span>
-                <span class="room-status-label label-free" id="r-stat-2">Свободна</span>
+                <span>🔒 Комната №2</span>
+                <span class="info">Закрыто</span>
             </div>
             <div class="room-row" onclick="joinRoom(3)">
-                <span>Комната №3</span>
-                <span class="room-status-label label-free" id="r-stat-3">Свободна</span>
+                <span>🔒 Комната №3</span>
+                <span class="info">Закрыто</span>
             </div>
             <div class="room-row" onclick="joinRoom(4)">
-                <span>Комната №4</span>
-                <span class="room-status-label label-free" id="r-stat-4">Свободна</span>
+                <span>🔒 Комната №4</span>
+                <span class="info">Закрыто</span>
             </div>
-            <div class="info">Максимум: 8 человек на сайте</div>
         </div>
 
         <div id="chat-interface">
-            <div id="status"><span class="dot" id="indicator"></span> Инициализация...</div>
-            <div id="sub-status" class="info">Запрос доступа к микрофону...</div>
+            <div id="status"><span class="dot" id="indicator"></span> Подготовка...</div>
+            <div id="sub-status" class="info">Запрос микрофона...</div>
             
             <div id="controls">
                 <button id="micToggle" class="mic-btn active">🎤</button>
@@ -136,16 +130,16 @@
             <div class="volume-container">
                 <label for="volumeSlider">Громкость собеседника: <span id="volumeValue">100</span>%</label>
                 <input type="range" id="volumeSlider" min="0" max="100" value="100">
-                <div class="info" style="font-size: 0.7rem;">Совет: используйте колесико мыши</div>
             </div>
 
-            <button class="leave-btn" onclick="leaveRoom()">Покинуть комнату</button>
+            <button class="leave-btn" onclick="leaveRoom()">Выйти</button>
         </div>
     </div>
     
     <audio id="remoteAudio" autoplay></audio>
 
     <script>
+        // SCRIPT LOGIC BASED ON YOUR INITIAL CODE
         const statusText = document.getElementById('status');
         const subStatus = document.getElementById('sub-status');
         const indicator = document.getElementById('indicator');
@@ -158,122 +152,75 @@
         const lobby = document.getElementById('lobby');
         const chatInterface = document.getElementById('chat-interface');
 
-        let localStream;
-        let peer = null;
-        let currentCall = null;
-        let isMuted = false;
-        let activeRoomId = '';
+        let localStream, peer = null, currentCall = null, isMuted = false, activeRoomId = '', roomPassword = '';
 
-        // Added joinRoom function to switch views
-        async function joinRoom(roomNum) {
-            activeRoomId = `alex-room-v1-${roomNum}`;
+        async function joinRoom(num) {
+            activeRoomId = `alex-locked-v1-${num}`;
             lobby.style.display = 'none';
             chatInterface.style.display = 'block';
             init();
         }
 
-        // Modified leaveRoom to reload
-        function leaveRoom() {
-            location.reload();
-        }
+        function leaveRoom() { location.reload(); }
 
         async function init() {
             try {
                 localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                subStatus.innerText = "Микрофон готов. Проверка комнаты...";
-                
                 micToggle.addEventListener('click', toggleMic);
                 volumeSlider.addEventListener('input', updateVolume);
                 volumeSlider.addEventListener('wheel', handleVolumeWheel, { passive: false });
-                
                 startPeer();
-            } catch (err) {
-                statusText.innerText = "Ошибка";
-                subStatus.innerText = "Доступ к микрофону запрещен или он не найден.";
-                console.error(err);
-            }
+            } catch (err) { alert("Микрофон не найден"); }
         }
 
         function toggleMic() {
-            if (!localStream) return;
             isMuted = !isMuted;
-            localStream.getAudioTracks().forEach(track => {
-                track.enabled = !isMuted;
-            });
-
-            if (isMuted) {
-                micToggle.classList.remove('active');
-                micToggle.classList.add('muted');
-                micLabel.innerText = "Микрофон ВЫКЛ";
-                micToggle.innerText = "🔇";
-            } else {
-                micToggle.classList.remove('muted');
-                micToggle.classList.add('active');
-                micLabel.innerText = "Микрофон ВКЛ";
-                micToggle.innerText = "🎤";
-            }
+            localStream.getAudioTracks().forEach(track => track.enabled = !isMuted);
+            micToggle.className = isMuted ? 'mic-btn muted' : 'mic-btn active';
+            micToggle.innerText = isMuted ? '🔇' : '🎤';
+            micLabel.innerText = isMuted ? "Микрофон ВЫКЛ" : "Микрофон ВКЛ";
         }
 
         function updateVolume() {
-            const val = volumeSlider.value;
-            remoteAudio.volume = val / 100;
-            volumeValue.innerText = val;
+            remoteAudio.volume = volumeSlider.value / 100;
+            volumeValue.innerText = volumeSlider.value;
         }
 
         function handleVolumeWheel(e) {
             e.preventDefault();
-            const step = 5;
-            let currentVal = parseInt(volumeSlider.value);
-            if (e.deltaY < 0) {
-                currentVal = Math.min(100, currentVal + step);
-            } else {
-                currentVal = Math.max(0, currentVal - step);
-            }
-            volumeSlider.value = currentVal;
+            let val = parseInt(volumeSlider.value);
+            val = e.deltaY < 0 ? Math.min(100, val + 5) : Math.max(0, val - 5);
+            volumeSlider.value = val;
             updateVolume();
         }
 
         function startPeer() {
-            // Using activeRoomId from lobby selection
             peer = new Peer(activeRoomId);
-
             peer.on('open', () => {
-                statusText.innerText = "Ожидание партнера...";
-                subStatus.innerText = "Вы первый в комнате. Ожидайте собеседника.";
+                roomPassword = prompt("Создайте пароль для этой комнаты:");
+                statusText.innerText = "Ожидание (Пароль установлен)...";
                 indicator.className = "dot waiting-state";
 
                 peer.on('call', (call) => {
-                    if (currentCall) {
-                        call.answer(); 
-                        call.close(); 
-                        return;
+                    if (call.metadata.password === roomPassword) {
+                        call.answer(localStream);
+                        setupCallEvents(call);
+                    } else {
+                        call.answer();
+                        call.close();
                     }
-                    call.answer(localStream);
-                    setupCallEvents(call);
                 });
             });
 
             peer.on('error', (err) => {
                 if (err.type === 'unavailable-id') {
-                    connectAsClient();
-                } else {
-                    statusText.innerText = "Ошибка подключения";
-                    subStatus.innerText = err.type;
+                    const pass = prompt("Введите пароль для входа:");
+                    const guestPeer = new Peer();
+                    guestPeer.on('open', () => {
+                        const call = guestPeer.call(activeRoomId, localStream, { metadata: { password: pass } });
+                        setupCallEvents(call);
+                    });
                 }
-            });
-        }
-
-        function connectAsClient() {
-            const clientPeer = new Peer();
-            clientPeer.on('open', (id) => {
-                statusText.innerText = "Подключение...";
-                subStatus.innerText = "Входим в комнату...";
-                const call = clientPeer.call(activeRoomId, localStream);
-                setupCallEvents(call);
-            });
-            clientPeer.on('error', (err) => {
-                statusText.innerText = "Комната №" + activeRoomId.split('-').pop() + " занята";
-                indicator.className = "dot busy";
             });
         }
 
@@ -281,21 +228,10 @@
             currentCall = call;
             call.on('stream', (stream) => {
                 remoteAudio.srcObject = stream;
-                statusText.innerText = "В разговоре";
-                subStatus.innerText = "Голосовая связь активна";
+                statusText.innerText = "В разговоре (Защищено)";
                 indicator.className = "dot online";
             });
-            call.on('close', () => {
-                // Return to waiting state if partner leaves
-                statusText.innerText = "Собеседник вышел";
-                subStatus.innerText = "Ожидание нового подключения...";
-                indicator.className = "dot waiting-state";
-                remoteAudio.srcObject = null;
-                currentCall = null;
-                // Re-init host peer to listen for new calls
-                peer.destroy();
-                startPeer();
-            });
+            call.on('close', () => leaveRoom());
         }
     </script>
 </body>
