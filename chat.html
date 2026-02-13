@@ -124,7 +124,7 @@
                 <span>Комната №4</span>
                 <span id="label-4" class="room-status-label label-free">СВОБОДНА</span>
             </div>
-            <div class="info">Максимум: 8 человек на сайте</div>
+            <div class="info">Обновление статусов в реальном времени...</div>
         </div>
 
         <div id="chat-interface">
@@ -166,10 +166,11 @@
         let activeRoomId = '';
         let scanInterval = null;
 
-        const roomStates = { 1: 'free', 2: 'free', 3: 'free', 4: 'free' };
+        // Храним статусы локально для блокировки кликов
+        const currentRoomStates = {};
 
         function updateRoomUI(num, state) {
-            roomStates[num] = state;
+            currentRoomStates[num] = state;
             const row = document.getElementById(`room-${num}`);
             const label = document.getElementById(`label-${num}`);
             if (!row || !label) return;
@@ -186,46 +187,35 @@
                 const targetId = `alex-room-v1-${i}`;
                 const checker = new Peer();
                 
-                checker.on('open', (id) => {
-                    // 1. Пытаемся подключиться к ID. Если открывается соединение - там один человек ждет.
-                    const conn = checker.connect(targetId, { reliable: true });
-                    let answered = false;
+                checker.on('open', () => {
+                    const conn = checker.connect(targetId);
+                    let found = false;
 
                     conn.on('open', () => {
-                        answered = true;
+                        found = true;
                         updateRoomUI(i, 'waiting');
                         checker.destroy();
                     });
 
-                    // 2. Если за 1.5 сек не подключились - ID либо свободен, либо ТАМ ДВОЕ.
                     setTimeout(() => {
-                        if (!answered && !checker.destroyed) {
-                            // Пробуем на долю секунды сами стать Хостом этого ID
-                            const tryHost = new Peer(targetId);
-                            tryHost.on('open', () => {
-                                updateRoomUI(i, 'free'); // Удалось занять? Значит было свободно.
-                                tryHost.destroy();
-                                checker.destroy();
-                            });
-                            tryHost.on('error', (err) => {
-                                if (err.type === 'unavailable-id') {
-                                    updateRoomUI(i, 'busy'); // Не удалось занять ID? Значит там уже двое общаются.
-                                }
-                                tryHost.destroy();
-                                checker.destroy();
-                            });
+                        if (!found) {
+                            updateRoomUI(i, 'free');
+                            checker.destroy();
                         }
-                    }, 1500);
+                    }, 2000);
                 });
-                
-                checker.on('error', () => checker.destroy());
+
+                checker.on('error', (err) => {
+                    if (err.type === 'peer-unavailable') updateRoomUI(i, 'free');
+                    checker.destroy();
+                });
             }
         }
 
         function startScanner() {
             if (!scanInterval) {
                 scanRooms();
-                scanInterval = setInterval(scanRooms, 8000);
+                scanInterval = setInterval(scanRooms, 10000);
             }
         }
 
@@ -239,8 +229,8 @@
         startScanner();
 
         async function joinRoom(roomNum) {
-            if (roomStates[roomNum] === 'busy') {
-                alert("Эта комната уже занята двумя людьми!");
+            if (currentRoomStates[roomNum] === 'busy') {
+                alert("Комната занята");
                 return;
             }
 
@@ -259,10 +249,7 @@
                 volumeSlider.addEventListener('input', updateVolume);
                 volumeSlider.addEventListener('wheel', handleVolumeWheel, { passive: false });
                 startPeer();
-            } catch (err) { 
-                alert("Микрофон не найден"); 
-                location.reload();
-            }
+            } catch (err) { alert("Микрофон не найден"); }
         }
 
         function startPeer() {
@@ -271,13 +258,21 @@
                 statusText.innerText = "Ожидание партнера...";
                 indicator.className = "dot waiting-state";
                 peer.on('call', (call) => {
-                    if (currentCall) { call.answer(); call.close(); return; }
+                    if (currentCall) {
+                        // Если мы уже говорим, а кто-то еще звонит - значит комната занята
+                        call.answer();
+                        call.close();
+                        return;
+                    }
                     call.answer(localStream);
                     setupCallEvents(call);
                 });
             });
             peer.on('error', (err) => {
-                if (err.type === 'unavailable-id') connectAsClient();
+                if (err.type === 'unavailable-id') {
+                    // Если ID занят, пробуем зайти как второй участник
+                    connectAsClient();
+                }
             });
         }
 
