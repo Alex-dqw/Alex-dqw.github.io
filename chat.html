@@ -12,6 +12,8 @@
         .dot { height: 12px; width: 12px; background-color: #555; border-radius: 50%; display: inline-block; margin-right: 10px; transition: 0.3s; }
         .online { background-color: #00ff88; box-shadow: 0 0 15px #00ff88; }
         .busy { background-color: #ff4444; box-shadow: 0 0 15px #ff4444; }
+        /* Added for "Waiting" state */
+        .waiting-state { background-color: #ff9500; box-shadow: 0 0 15px #ff9500; } 
         .info { color: #888; font-size: 0.9rem; margin-top: 10px; }
 
         #controls {
@@ -83,30 +85,67 @@
             cursor: pointer;
             accent-color: #00ff88;
         }
+
+        /* Lobby specific styles */
+        #lobby { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+        .room-row { display: flex; align-items: center; justify-content: space-between; background: #252525; padding: 10px 15px; border-radius: 10px; cursor: pointer; border: 1px solid #444; transition: 0.3s; }
+        .room-row:hover { background: #333; border-color: #00ff88; }
+        .room-status-label { font-size: 0.7rem; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; }
+        .label-free { background: #004422; color: #00ff88; }
+        .label-waiting { background: #443300; color: #ff9500; }
+        .label-busy { background: #441111; color: #ff4444; }
+
+        #chat-interface { display: none; width: 100%; }
+        .leave-btn { margin-top: 20px; background: none; border: 1px solid #ff4444; color: #ff4444; padding: 8px 15px; border-radius: 5px; cursor: pointer; transition: 0.3s; }
+        .leave-btn:hover { background: #ff4444; color: #fff; }
     </style>
 </head>
 <body>
 
     <div id="status-card">
-        <div id="status"><span class="dot" id="indicator"></span> Инициализация...</div>
-        <div id="sub-status" class="info">Запрос доступа к микрофону...</div>
-        
-        <div id="controls">
-            <button id="micToggle" class="mic-btn active">🎤</button>
-            <div id="mic-label" class="info">Микрофон ВКЛ</div>
+        <div id="lobby">
+            <h2 style="margin-top:0;">Выберите комнату</h2>
+            <div class="room-row" onclick="joinRoom(1)">
+                <span>Комната №1</span>
+                <span class="room-status-label label-free" id="r-stat-1">Свободна</span>
+            </div>
+            <div class="room-row" onclick="joinRoom(2)">
+                <span>Комната №2</span>
+                <span class="room-status-label label-free" id="r-stat-2">Свободна</span>
+            </div>
+            <div class="room-row" onclick="joinRoom(3)">
+                <span>Комната №3</span>
+                <span class="room-status-label label-free" id="r-stat-3">Свободна</span>
+            </div>
+            <div class="room-row" onclick="joinRoom(4)">
+                <span>Комната №4</span>
+                <span class="room-status-label label-free" id="r-stat-4">Свободна</span>
+            </div>
+            <div class="info">Максимум: 8 человек на сайте</div>
         </div>
 
-        <div class="volume-container">
-            <label for="volumeSlider">Громкость собеседника: <span id="volumeValue">100</span>%</label>
-            <input type="range" id="volumeSlider" min="0" max="100" value="100">
-            <div class="info" style="font-size: 0.7rem;">Совет: используйте колесико мыши</div>
+        <div id="chat-interface">
+            <div id="status"><span class="dot" id="indicator"></span> Инициализация...</div>
+            <div id="sub-status" class="info">Запрос доступа к микрофону...</div>
+            
+            <div id="controls">
+                <button id="micToggle" class="mic-btn active">🎤</button>
+                <div id="mic-label" class="info">Микрофон ВКЛ</div>
+            </div>
+
+            <div class="volume-container">
+                <label for="volumeSlider">Громкость собеседника: <span id="volumeValue">100</span>%</label>
+                <input type="range" id="volumeSlider" min="0" max="100" value="100">
+                <div class="info" style="font-size: 0.7rem;">Совет: используйте колесико мыши</div>
+            </div>
+
+            <button class="leave-btn" onclick="leaveRoom()">Покинуть комнату</button>
         </div>
     </div>
     
     <audio id="remoteAudio" autoplay></audio>
 
     <script>
-        const ROOM_ID = 'alex-voice-room-unique-123'; 
         const statusText = document.getElementById('status');
         const subStatus = document.getElementById('sub-status');
         const indicator = document.getElementById('indicator');
@@ -115,22 +154,36 @@
         const micLabel = document.getElementById('mic-label');
         const volumeSlider = document.getElementById('volumeSlider');
         const volumeValue = document.getElementById('volumeValue');
+        
+        const lobby = document.getElementById('lobby');
+        const chatInterface = document.getElementById('chat-interface');
 
         let localStream;
         let peer = null;
         let currentCall = null;
         let isMuted = false;
+        let activeRoomId = '';
+
+        // Added joinRoom function to switch views
+        async function joinRoom(roomNum) {
+            activeRoomId = `alex-room-v1-${roomNum}`;
+            lobby.style.display = 'none';
+            chatInterface.style.display = 'block';
+            init();
+        }
+
+        // Modified leaveRoom to reload
+        function leaveRoom() {
+            location.reload();
+        }
 
         async function init() {
             try {
                 localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 subStatus.innerText = "Микрофон готов. Проверка комнаты...";
                 
-                // Event listeners for UI
                 micToggle.addEventListener('click', toggleMic);
                 volumeSlider.addEventListener('input', updateVolume);
-                
-                // Add wheel support for volume
                 volumeSlider.addEventListener('wheel', handleVolumeWheel, { passive: false });
                 
                 startPeer();
@@ -144,13 +197,10 @@
         function toggleMic() {
             if (!localStream) return;
             isMuted = !isMuted;
-            
-            // Toggle local track status
             localStream.getAudioTracks().forEach(track => {
                 track.enabled = !isMuted;
             });
 
-            // Update UI elements
             if (isMuted) {
                 micToggle.classList.remove('active');
                 micToggle.classList.add('muted');
@@ -166,42 +216,34 @@
 
         function updateVolume() {
             const val = volumeSlider.value;
-            // Native audio volume scale is 0 to 1
             remoteAudio.volume = val / 100;
             volumeValue.innerText = val;
         }
 
         function handleVolumeWheel(e) {
-            // Prevent page from scrolling
             e.preventDefault();
-            
             const step = 5;
             let currentVal = parseInt(volumeSlider.value);
-            
             if (e.deltaY < 0) {
-                // Wheel scrolled up
                 currentVal = Math.min(100, currentVal + step);
             } else {
-                // Wheel scrolled down
                 currentVal = Math.max(0, currentVal - step);
             }
-            
             volumeSlider.value = currentVal;
             updateVolume();
         }
 
         function startPeer() {
-            const hostPeer = new Peer(ROOM_ID);
+            // Using activeRoomId from lobby selection
+            peer = new Peer(activeRoomId);
 
-            hostPeer.on('open', () => {
+            peer.on('open', () => {
                 statusText.innerText = "Ожидание партнера...";
-                subStatus.innerText = "Вы — Организатор. Передайте ссылку другу.";
-                indicator.classList.remove('busy');
-                indicator.classList.add('online');
+                subStatus.innerText = "Вы первый в комнате. Ожидайте собеседника.";
+                indicator.className = "dot waiting-state";
 
-                hostPeer.on('call', (call) => {
+                peer.on('call', (call) => {
                     if (currentCall) {
-                        // Busy line management
                         call.answer(); 
                         call.close(); 
                         return;
@@ -211,62 +253,50 @@
                 });
             });
 
-            hostPeer.on('error', (err) => {
+            peer.on('error', (err) => {
                 if (err.type === 'unavailable-id') {
-                    // Room exists, connect as guest
                     connectAsClient();
                 } else {
                     statusText.innerText = "Ошибка подключения";
                     subStatus.innerText = err.type;
-                    console.error(err);
                 }
             });
         }
 
         function connectAsClient() {
             const clientPeer = new Peer();
-
             clientPeer.on('open', (id) => {
                 statusText.innerText = "Подключение...";
-                subStatus.innerText = "Вход в существующую комнату...";
-                
-                const call = clientPeer.call(ROOM_ID, localStream);
+                subStatus.innerText = "Входим в комнату...";
+                const call = clientPeer.call(activeRoomId, localStream);
                 setupCallEvents(call);
             });
-
             clientPeer.on('error', (err) => {
-                statusText.innerText = "Линия занята";
-                subStatus.innerText = "Не удалось подключиться к хосту.";
-                indicator.classList.add('busy');
+                statusText.innerText = "Комната №" + activeRoomId.split('-').pop() + " занята";
+                indicator.className = "dot busy";
             });
         }
 
         function setupCallEvents(call) {
             currentCall = call;
-
             call.on('stream', (stream) => {
                 remoteAudio.srcObject = stream;
                 statusText.innerText = "В разговоре";
                 subStatus.innerText = "Голосовая связь активна";
-                indicator.classList.remove('busy');
-                indicator.classList.add('online');
+                indicator.className = "dot online";
             });
-
             call.on('close', () => {
-                statusText.innerText = "Отключено";
-                subStatus.innerText = "Вызов завершен.";
-                indicator.classList.remove('online');
+                // Return to waiting state if partner leaves
+                statusText.innerText = "Собеседник вышел";
+                subStatus.innerText = "Ожидание нового подключения...";
+                indicator.className = "dot waiting-state";
+                remoteAudio.srcObject = null;
                 currentCall = null;
-            });
-
-            call.on('error', (err) => {
-                statusText.innerText = "Ошибка вызова";
-                subStatus.innerText = err.message;
-                currentCall = null;
+                // Re-init host peer to listen for new calls
+                peer.destroy();
+                startPeer();
             });
         }
-
-        init();
     </script>
 </body>
 </html>
