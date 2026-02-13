@@ -15,61 +15,32 @@
         .waiting-state { background-color: #ff9500; box-shadow: 0 0 15px #ff9500; } 
         .info { color: #888; font-size: 0.9rem; margin-top: 10px; }
 
-        #controls {
-            margin-top: 25px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-        }
-        
-        .mic-btn {
-            width: 65px;
-            height: 65px;
-            border-radius: 50%;
-            border: none;
-            cursor: pointer;
-            background: #333;
-            color: white;
-            font-size: 1.5rem;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            outline: none;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            margin: 0 auto;
-        }
-        
+        /* Lobby Styles */
+        #lobby { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+        .room-row { display: flex; align-items: center; justify-content: space-between; background: #252525; padding: 12px 18px; border-radius: 10px; cursor: pointer; border: 2px solid #444; transition: 0.3s; }
+        .room-row.free-room { border-color: #00ff88; }
+        .room-row.waiting-room { border-color: #ff9500; background: #2a1b00; }
+        .room-row.busy-room { border-color: #ff4444; background: #2a0000; cursor: not-allowed; }
+        .room-status-label { font-size: 0.75rem; text-transform: uppercase; padding: 4px 8px; border-radius: 4px; font-weight: bold; }
+        .label-free { color: #00ff88; }
+        .label-waiting { color: #ff9500; }
+        .label-busy { color: #ff4444; }
+
+        /* Interface Styles */
+        #chat-interface { display: none; width: 100%; }
+        #controls { margin-top: 25px; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; }
+        .mic-btn { width: 65px; height: 65px; border-radius: 50%; border: none; cursor: pointer; background: #333; color: white; font-size: 1.5rem; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; align-items: center; justify-content: center; outline: none; box-shadow: 0 4px 15px rgba(0,0,0,0.3); margin: 0 auto; }
         .mic-btn:active { transform: scale(0.9); }
         .mic-btn.active { background: #00ff88; color: #000; box-shadow: 0 0 20px rgba(0, 255, 136, 0.3); }
         .mic-btn.muted { background: #ff4444; color: #fff; box-shadow: 0 0 20px rgba(255, 68, 68, 0.3); }
-        
         #mic-label { margin-top: 12px; font-weight: bold; letter-spacing: 0.5px; display: block; width: 100%; text-align: center; }
 
-        .volume-container {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #333;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-        }
+        .volume-container { margin-top: 30px; padding-top: 20px; border-top: 1px solid #333; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 10px; }
         .volume-container label { font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 1.5px; }
         input[type=range] { width: 90%; cursor: pointer; accent-color: #00ff88; }
 
-        #lobby { display: flex; flex-direction: column; gap: 10px; width: 100%; }
-        .room-row { display: flex; align-items: center; justify-content: space-between; background: #252525; padding: 12px 18px; border-radius: 10px; cursor: pointer; border: 2px solid #444; transition: 0.3s; }
-        .room-row:hover { background: #333; }
-        
-        .room-status-label { font-size: 0.75rem; text-transform: uppercase; padding: 4px 8px; border-radius: 4px; font-weight: bold; color: #00ff88; }
-
-        #chat-interface { display: none; width: 100%; }
-        .leave-btn { margin-top: 20px; background: none; border: 1px solid #ff4444; color: #ff4444; padding: 8px 15px; border-radius: 5px; cursor: pointer; transition: 0.3s; }
-        .leave-btn:hover { background: #ff4444; color: #fff; }
+        .leave-btn { margin-top: 25px; background: none; border: 1px solid #ff4444; color: #ff4444; padding: 10px 20px; border-radius: 8px; cursor: pointer; transition: 0.3s; font-weight: bold; }
+        .leave-btn:hover { background: #ff4444; color: white; }
     </style>
 </head>
 <body>
@@ -77,15 +48,28 @@
     <div id="status-card">
         <div id="lobby">
             <h2 style="margin-top:0;">Выберите комнату</h2>
-            <div class="room-row" onclick="joinRoom(1)"><span>Комната №1</span><span class="room-status-label">ВОЙТИ</span></div>
-            <div class="room-row" onclick="joinRoom(2)"><span>Комната №2</span><span class="room-status-label">ВОЙТИ</span></div>
-            <div class="room-row" onclick="joinRoom(3)"><span>Комната №3</span><span class="room-status-label">ВОЙТИ</span></div>
-            <div class="room-row" onclick="joinRoom(4)"><span>Комната №4</span><span class="room-status-label">ВОЙТИ</span></div>
+            <div id="room-1" class="room-row free-room" onclick="joinRoom(1)">
+                <span>Комната №1</span>
+                <span id="label-1" class="room-status-label label-free">СВОБОДНА</span>
+            </div>
+            <div id="room-2" class="room-row free-room" onclick="joinRoom(2)">
+                <span>Комната №2</span>
+                <span id="label-2" class="room-status-label label-free">СВОБОДНА</span>
+            </div>
+            <div id="room-3" class="room-row free-room" onclick="joinRoom(3)">
+                <span>Комната №3</span>
+                <span id="label-3" class="room-status-label label-free">СВОБОДНА</span>
+            </div>
+            <div id="room-4" class="room-row free-room" onclick="joinRoom(4)">
+                <span>Комната №4</span>
+                <span id="label-4" class="room-status-label label-free">СВОБОДНА</span>
+            </div>
+            <div class="info">Автоматическое обновление статусов...</div>
         </div>
 
         <div id="chat-interface">
-            <div id="status"><span class="dot" id="indicator"></span> Подключение...</div>
-            <div id="sub-status" class="info">Ожидание микрофона...</div>
+            <div id="status"><span class="dot" id="indicator"></span> Инициализация...</div>
+            <div id="sub-status" class="info">Запрос доступа к микрофону...</div>
             
             <div id="controls">
                 <button id="micToggle" class="mic-btn active">🎤</button>
@@ -93,8 +77,9 @@
             </div>
 
             <div class="volume-container">
-                <label for="volumeSlider">Громкость: <span id="volumeValue">100</span>%</label>
+                <label for="volumeSlider">Громкость собеседника: <span id="volumeValue">100</span>%</label>
                 <input type="range" id="volumeSlider" min="0" max="100" value="100">
+                <div class="info" style="font-size: 0.7rem;">Совет: используйте колесико мыши</div>
             </div>
 
             <button class="leave-btn" onclick="leaveRoom()">Покинуть комнату</button>
@@ -115,39 +100,113 @@
         const lobby = document.getElementById('lobby');
         const chatInterface = document.getElementById('chat-interface');
 
-        let localStream, peer = null, currentCall = null, isMuted = false, activeRoomId = '';
+        let localStream;
+        let peer = null;
+        let currentCall = null;
+        let isMuted = false;
+        let activeRoomId = '';
+        let scanInterval = null;
+        let roomStates = { 1: 'free', 2: 'free', 3: 'free', 4: 'free' };
+
+        // --- SCANNER LOGIC ---
+
+        function updateRoomUI(num, state) {
+            roomStates[num] = state;
+            const row = document.getElementById(`room-${num}`);
+            const label = document.getElementById(`label-${num}`);
+            if (!row || !label) return;
+
+            row.className = 'room-row ' + (state === 'busy' ? 'busy-room' : (state === 'waiting' ? 'waiting-room' : 'free-room'));
+            label.className = 'room-status-label ' + (state === 'busy' ? 'label-busy' : (state === 'waiting' ? 'label-waiting' : 'label-free'));
+            label.innerText = state === 'busy' ? 'ЗАНЯТО' : (state === 'waiting' ? 'ОЖИДАНИЕ' : 'СВОБОДНА');
+        }
+
+        async function scanRooms() {
+            if (chatInterface.style.display === 'block') return;
+
+            for (let i = 1; i <= 4; i++) {
+                const targetId = `alex-room-v1-${i}`;
+                const checker = new Peer();
+                
+                checker.on('open', () => {
+                    const conn = checker.connect(targetId);
+                    let detected = false;
+
+                    conn.on('open', () => {
+                        detected = true;
+                        updateRoomUI(i, 'waiting');
+                        checker.destroy();
+                    });
+
+                    setTimeout(() => {
+                        if (!detected && !checker.destroyed) {
+                            const hostCheck = new Peer(targetId);
+                            hostCheck.on('open', () => {
+                                updateRoomUI(i, 'free');
+                                hostCheck.destroy();
+                                checker.destroy();
+                            });
+                            hostCheck.on('error', (err) => {
+                                if (err.type === 'unavailable-id') updateRoomUI(i, 'busy');
+                                hostCheck.destroy();
+                                checker.destroy();
+                            });
+                        }
+                    }, 1500);
+                });
+                checker.on('error', () => checker.destroy());
+            }
+        }
+
+        function startScanner() {
+            scanRooms();
+            scanInterval = setInterval(scanRooms, 8000);
+        }
+
+        startScanner();
+
+        // --- VOICE CHAT LOGIC ---
 
         async function joinRoom(roomNum) {
+            if (roomStates[roomNum] === 'busy') {
+                alert("Комната занята двумя собеседниками!");
+                return;
+            }
+
+            clearInterval(scanInterval);
             activeRoomId = `alex-room-v1-${roomNum}`;
             lobby.style.display = 'none';
             chatInterface.style.display = 'block';
-            init();
-        }
 
-        async function init() {
             try {
                 localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                subStatus.innerText = "Микрофон готов.";
-                micToggle.onclick = toggleMic;
-                volumeSlider.oninput = updateVolume;
-                volumeSlider.onwheel = handleVolumeWheel;
+                subStatus.innerText = "Микрофон готов. Подключение...";
+                
+                micToggle.addEventListener('click', toggleMic);
+                volumeSlider.addEventListener('input', updateVolume);
+                volumeSlider.addEventListener('wheel', handleVolumeWheel, { passive: false });
+
                 startPeer();
-            } catch (err) { 
-                alert("Микрофон не доступен!"); 
+            } catch (err) {
+                alert("Микрофон не найден.");
                 location.reload();
             }
         }
 
         function startPeer() {
-            // Пытаемся стать Хостом (создать комнату)
             peer = new Peer(activeRoomId);
-            
+
             peer.on('open', () => {
-                statusText.innerText = "В комнате (Ожидание)";
+                statusText.innerText = "Ожидание партнера...";
+                subStatus.innerText = "Вы в комнате. Ждем второго участника.";
                 indicator.className = "dot waiting-state";
-                subStatus.innerText = "ID комнаты: " + activeRoomId;
-                
+
                 peer.on('call', (call) => {
+                    if (currentCall) {
+                        call.answer(); 
+                        call.close();
+                        return;
+                    }
                     call.answer(localStream);
                     setupCallEvents(call);
                 });
@@ -155,10 +214,9 @@
 
             peer.on('error', (err) => {
                 if (err.type === 'unavailable-id') {
-                    // Если ID занят, заходим как Клиент (второй человек)
                     connectAsClient();
                 } else {
-                    console.error("Peer error:", err);
+                    console.error(err);
                 }
             });
         }
@@ -166,12 +224,13 @@
         function connectAsClient() {
             const clientPeer = new Peer();
             clientPeer.on('open', () => {
+                statusText.innerText = "Подключение...";
                 const call = clientPeer.call(activeRoomId, localStream);
                 setupCallEvents(call);
             });
-            clientPeer.on('error', (err) => {
-                alert("Ошибка подключения или комната переполнена.");
-                location.reload();
+            clientPeer.on('error', () => {
+                alert("Линия занята.");
+                leaveRoom();
             });
         }
 
@@ -180,8 +239,8 @@
             call.on('stream', (stream) => {
                 remoteAudio.srcObject = stream;
                 statusText.innerText = "В разговоре";
+                subStatus.innerText = "Голосовая связь активна";
                 indicator.className = "dot online";
-                subStatus.innerText = "Собеседник подключен";
             });
             call.on('close', () => leaveRoom());
             call.on('error', () => leaveRoom());
@@ -189,9 +248,9 @@
 
         function toggleMic() {
             isMuted = !isMuted;
-            localStream.getAudioTracks().forEach(t => t.enabled = !isMuted);
+            localStream.getAudioTracks().forEach(track => track.enabled = !isMuted);
             micToggle.className = isMuted ? 'mic-btn muted' : 'mic-btn active';
-            micToggle.innerText = isMuted ? '🔇' : '🎤';
+            micToggle.innerText = isMuted ? "🔇" : "🎤";
             micLabel.innerText = isMuted ? "Микрофон ВЫКЛ" : "Микрофон ВКЛ";
         }
 
@@ -202,15 +261,17 @@
 
         function handleVolumeWheel(e) {
             e.preventDefault();
-            let val = parseInt(volumeSlider.value);
-            val = e.deltaY < 0 ? Math.min(100, val + 5) : Math.max(0, val - 5);
-            volumeSlider.value = val;
+            const step = 5;
+            let currentVal = parseInt(volumeSlider.value);
+            currentVal = e.deltaY < 0 ? Math.min(100, currentVal + step) : Math.max(0, currentVal - step);
+            volumeSlider.value = currentVal;
             updateVolume();
         }
 
-        function leaveRoom() { 
+        function leaveRoom() {
+            if (currentCall) currentCall.close();
             if (peer) peer.destroy();
-            location.reload(); 
+            location.reload();
         }
     </script>
 </body>
