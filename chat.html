@@ -43,25 +43,10 @@
         }
         
         .mic-btn:active { transform: scale(0.9); }
-        .mic-btn.active {
-            background: #00ff88;
-            color: #000;
-            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
-        }
-        .mic-btn.muted {
-            background: #ff4444;
-            color: #fff;
-            box-shadow: 0 0 20px rgba(255, 68, 68, 0.3);
-        }
+        .mic-btn.active { background: #00ff88; color: #000; box-shadow: 0 0 20px rgba(0, 255, 136, 0.3); }
+        .mic-btn.muted { background: #ff4444; color: #fff; box-shadow: 0 0 20px rgba(255, 68, 68, 0.3); }
         
-        #mic-label { 
-            margin-top: 12px;
-            font-weight: bold; 
-            letter-spacing: 0.5px; 
-            display: block;
-            width: 100%;
-            text-align: center;
-        }
+        #mic-label { margin-top: 12px; font-weight: bold; letter-spacing: 0.5px; display: block; width: 100%; text-align: center; }
 
         .volume-container {
             margin-top: 30px;
@@ -73,19 +58,9 @@
             align-items: center;
             gap: 10px;
         }
-        .volume-container label {
-            font-size: 0.75rem;
-            color: #888;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-        }
-        input[type=range] {
-            width: 90%;
-            cursor: pointer;
-            accent-color: #00ff88;
-        }
+        .volume-container label { font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 1.5px; }
+        input[type=range] { width: 90%; cursor: pointer; accent-color: #00ff88; }
 
-        /* Lobby styles */
         #lobby { display: flex; flex-direction: column; gap: 10px; width: 100%; }
         .room-row { display: flex; align-items: center; justify-content: space-between; background: #252525; padding: 12px 18px; border-radius: 10px; cursor: pointer; border: 2px solid #444; transition: 0.3s; }
         
@@ -124,12 +99,11 @@
                 <span>Комната №4</span>
                 <span id="label-4" class="room-status-label label-free">СВОБОДНА</span>
             </div>
-            <div class="info">Обновление статусов в реальном времени...</div>
         </div>
 
         <div id="chat-interface">
             <div id="status"><span class="dot" id="indicator"></span> Инициализация...</div>
-            <div id="sub-status" class="info">Запрос доступа к микрофону...</div>
+            <div id="sub-status" class="info">Запрос доступа...</div>
             
             <div id="controls">
                 <button id="micToggle" class="mic-btn active">🎤</button>
@@ -137,11 +111,11 @@
             </div>
 
             <div class="volume-container">
-                <label for="volumeSlider">Громкость собеседника: <span id="volumeValue">100</span>%</label>
+                <label for="volumeSlider">Громкость: <span id="volumeValue">100</span>%</label>
                 <input type="range" id="volumeSlider" min="0" max="100" value="100">
             </div>
 
-            <button class="leave-btn" onclick="leaveRoom()">Покинуть комнату</button>
+            <button class="leave-btn" onclick="leaveRoom()">Покинуть</button>
         </div>
     </div>
     
@@ -159,82 +133,53 @@
         const lobby = document.getElementById('lobby');
         const chatInterface = document.getElementById('chat-interface');
 
-        let localStream;
-        let peer = null;
-        let currentCall = null;
-        let isMuted = false;
-        let activeRoomId = '';
-        let scanInterval = null;
-
-        // Храним статусы локально для блокировки кликов
-        const currentRoomStates = {};
+        let localStream, peer = null, currentCall = null, isMuted = false, activeRoomId = '', scanInterval = null;
 
         function updateRoomUI(num, state) {
-            currentRoomStates[num] = state;
             const row = document.getElementById(`room-${num}`);
             const label = document.getElementById(`label-${num}`);
             if (!row || !label) return;
-
             row.className = 'room-row ' + (state === 'busy' ? 'busy-room' : (state === 'waiting' ? 'waiting-room' : 'free-room'));
             label.className = 'room-status-label ' + (state === 'busy' ? 'label-busy' : (state === 'waiting' ? 'label-waiting' : 'label-free'));
             label.innerText = state === 'busy' ? 'ЗАНЯТО' : (state === 'waiting' ? 'ОЖИДАНИЕ' : 'СВОБОДНА');
         }
 
+        // Самый надежный способ сканирования: один временный Peer для всех проверок
         async function scanRooms() {
             if (chatInterface.style.display === 'block') return;
-
-            for (let i = 1; i <= 4; i++) {
-                const targetId = `alex-room-v1-${i}`;
-                const checker = new Peer();
-                
-                checker.on('open', () => {
-                    const conn = checker.connect(targetId);
-                    let found = false;
-
-                    conn.on('open', () => {
-                        found = true;
-                        updateRoomUI(i, 'waiting');
-                        checker.destroy();
+            
+            const scanner = new Peer();
+            scanner.on('open', () => {
+                for (let i = 1; i <= 4; i++) {
+                    const targetId = `alex-room-v1-${i}`;
+                    const conn = scanner.connect(targetId);
+                    
+                    conn.on('open', () => { 
+                        updateRoomUI(i, 'waiting'); 
+                        conn.close(); 
                     });
 
                     setTimeout(() => {
-                        if (!found) {
+                        // Если за 2 сек не подключились, считаем свободной
+                        // (В этой версии 'busy' определится только при попытке входа)
+                        if (conn.readyState !== 'open') {
                             updateRoomUI(i, 'free');
-                            checker.destroy();
                         }
                     }, 2000);
-                });
-
-                checker.on('error', (err) => {
-                    if (err.type === 'peer-unavailable') updateRoomUI(i, 'free');
-                    checker.destroy();
-                });
-            }
+                }
+                setTimeout(() => scanner.destroy(), 3000);
+            });
         }
 
         function startScanner() {
-            if (!scanInterval) {
-                scanRooms();
-                scanInterval = setInterval(scanRooms, 10000);
-            }
-        }
-
-        function stopScanner() {
-            if (scanInterval) {
-                clearInterval(scanInterval);
-                scanInterval = null;
-            }
+            scanRooms();
+            scanInterval = setInterval(scanRooms, 10000);
         }
 
         startScanner();
 
         async function joinRoom(roomNum) {
-            if (currentRoomStates[roomNum] === 'busy') {
-                alert("Комната занята");
-                return;
-            }
-
-            stopScanner();
+            clearInterval(scanInterval);
             activeRoomId = `alex-room-v1-${roomNum}`;
             lobby.style.display = 'none';
             chatInterface.style.display = 'block';
@@ -244,12 +189,11 @@
         async function init() {
             try {
                 localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                subStatus.innerText = "Микрофон готов.";
                 micToggle.addEventListener('click', toggleMic);
                 volumeSlider.addEventListener('input', updateVolume);
                 volumeSlider.addEventListener('wheel', handleVolumeWheel, { passive: false });
                 startPeer();
-            } catch (err) { alert("Микрофон не найден"); }
+            } catch (err) { alert("Микрофон не найден"); location.reload(); }
         }
 
         function startPeer() {
@@ -259,20 +203,15 @@
                 indicator.className = "dot waiting-state";
                 peer.on('call', (call) => {
                     if (currentCall) {
-                        // Если мы уже говорим, а кто-то еще звонит - значит комната занята
-                        call.answer();
-                        call.close();
-                        return;
+                        // Если зашел ТРЕТИЙ - сбрасываем его
+                        call.answer(); call.close(); return;
                     }
                     call.answer(localStream);
                     setupCallEvents(call);
                 });
             });
             peer.on('error', (err) => {
-                if (err.type === 'unavailable-id') {
-                    // Если ID занят, пробуем зайти как второй участник
-                    connectAsClient();
-                }
+                if (err.type === 'unavailable-id') connectAsClient();
             });
         }
 
@@ -280,7 +219,12 @@
             const clientPeer = new Peer();
             clientPeer.on('open', () => {
                 const call = clientPeer.call(activeRoomId, localStream);
+                // Если хост уже занят другим, он сам закроет звонок
                 setupCallEvents(call);
+            });
+            clientPeer.on('error', () => {
+                alert("Комната занята!");
+                location.reload();
             });
         }
 
@@ -298,7 +242,6 @@
             isMuted = !isMuted;
             localStream.getAudioTracks().forEach(t => t.enabled = !isMuted);
             micToggle.className = isMuted ? 'mic-btn muted' : 'mic-btn active';
-            micToggle.innerText = isMuted ? '🔇' : '🎤';
             micLabel.innerText = isMuted ? "Микрофон ВЫКЛ" : "Микрофон ВКЛ";
         }
 
