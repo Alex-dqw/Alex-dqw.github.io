@@ -141,14 +141,15 @@
                 
                 //let apiUrl = `https://api.allorigins.win/get?url=${encodeURIComponent('https://api.pocketnet.app/rpc/getposts?ids=' + videoHash)}`;
 
-                let targetUrl = `https://api.pocketnet.app/rpc/getposts?ids=${videoHash}`;
-                let apiUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
-
-                fetch(apiUrl)
-                    .then(res => {
-                        if (res.ok) return res.json();
-                        throw new Error('CORS or Network error');
-                    })
+                fetch('https://api.pocketnet.app/rpc/getposts', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    method: "getposts",
+                    parameters: { ids: [videoHash] }
+                })
+            })
+            .then(res => res.json())
                     .then(response => {
                         // Проверяем, что пост найден и в нем есть видео
                         if (response.result && response.result.length > 0) {
