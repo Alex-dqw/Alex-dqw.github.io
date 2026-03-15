@@ -1,4 +1,7 @@
  document.addEventListener('DOMContentLoaded', function() {
+            if (typeof chrome !== "undefined" && chrome.tabs) {
+                document.body.classList.add('is-extension');
+            }
             // Находим элементы
             const playBtn = document.querySelector('.play-btn');
             const playNewTabBtn = document.querySelector('.play2-btn');
