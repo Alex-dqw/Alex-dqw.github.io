@@ -145,7 +145,6 @@
                 let targetUrl = `https://api.pocketnet.app/rpc/getposts?ids=${videoHash}`;
                 let apiUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
 
-
                 fetch(apiUrl)
                     .then(res => {
                         if (res.ok) return res.json();
