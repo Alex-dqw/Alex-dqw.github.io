@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bastyon Download</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f2f5;
+            font-family: sans-serif;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            text-transform: uppercase;
+        }
+
+        .play-btn {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .play2-btn {
+            background-color: orange;
+            color: green;
+        }
+
+        .download-btn {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+        .container {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+    <link rel="icon" href="https://bastyon.com/favicon.svg" sizes="any" type="image/svg+xml">
+</head>
+<body>
+
+    <div class="container">
+        <input type="text" id="linkInput" placeholder="Paste your link here...">
+        <br>
+        <button class="btn play-btn" onclick="handlePlay()">PLAY</button>
+        <button class="btn play2-btn" onclick="handlePlay(true)">PLAY NEW TAB</button>
+        <button class="btn download-btn" onclick="handleDownload()">DOWNLOAD!</button>
+        <a class="video-link" hidden="hidden" target="_self" download></a>
+    </div>
+
+    <script>
+        function handlePlay(newLink = false) {
+            let link = document.getElementById('linkInput').value;
+            if (link) {
+                link = link.replace("/w/", "/api/v1/videos/");
+                
+                fetch(link)
+                    .then(response => response.json())
+                    .then(data => {
+                        const firstPlaylist = data.streamingPlaylists.find(p => p.files && p.files.length > 0);
+                        
+                        if (firstPlaylist) {
+                            const firstFile = firstPlaylist.files[0];
+                            
+                            if (firstFile && firstFile.magnetUri) {
+                                // Разбиваем строку по "&ws=" и берем вторую часть
+                                let parts = firstFile.magnetUri.split("&ws=");
+                                if (parts.length > 1) {
+                                    // Декодируем строку: %2F станет /, %3A станет :
+                                    let directUrl = decodeURIComponent(parts[1]);
+                                    if (newLink) {
+                                        // Открываем в новой вкладке
+                                        window.open(directUrl, '_blank');
+                                    } else {
+                                        window.location.href = directUrl;
+                                    }
+                                }
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching data:', error);
+                    });
+            }
+        }
+
+        function handleDownload() {
+
+            let link = document.getElementById('linkInput').value;
+
+            if (link.includes("bastyon.com")) {
+            
+            let peertubeLink = "";    
+            //let bastyonLink = "https://bastyon.com/index?video=1&v=83288116447662c81fdc47ab32c64303bb263f85a8b9221d97420a4109a82862";
+            let urlParams = new URLSearchParams(new URL(link).search);
+            let videoHash = urlParams.get('v');
+
+            if (videoHash) {
+                //let apiUrl = `https://api.pocketnet.app/rpc/getposts?ids=${videoHash}`;
+                //let apiUrl = `https://corsproxy.io/?https://api.pocketnet.app/rpc/getposts?ids=${videoHash}`;
+                
+                //let targetUrl = encodeURIComponent(`https://api.pocketnet.app/rpc/getposts?ids=${videoHash}`);
+                //let apiUrl = `https://api.allorigins.win/get?url=${targetUrl}`;
+                
+                //let apiUrl = `https://api.allorigins.win/get?url=${encodeURIComponent('https://api.pocketnet.app/rpc/getposts?ids=' + videoHash)}`;
+
+                let targetUrl = `https://api.pocketnet.app/rpc/getposts?ids=${videoHash}`;
+                let apiUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
+
+
+                fetch(apiUrl)
+                    .then(res => {
+                        if (res.ok) return res.json();
+                        throw new Error('CORS or Network error');
+                    })
+                    .then(response => {
+                        // Проверяем, что пост найден и в нем есть видео
+                        if (response.result && response.result.length > 0) {
+                            let postData = response.result[0];
+                            let videoInfo = postData.v; // Объект с данными видео
+
+                            if (videoInfo && videoInfo.host && videoInfo.id) {
+                                // Собираем ту самую ссылку
+                                peertubeLink = `https://${videoInfo.host}/w/${videoInfo.id}`;
+                                document.getElementById('linkInput').value = peertubeLink;
+                            }
+                        }
+                });
+            }
+            
+            }
+
+            else if (link.includes("peertube")) {
+
+            if (link) {
+                link = link.replace("/w/", "/api/v1/videos/");
+                
+                fetch(link)
+                    .then(response => response.json())
+                    .then(data => {
+                        const firstPlaylist = data.streamingPlaylists.find(p => p.files && p.files.length > 0);
+                        
+                        if (firstPlaylist) {
+                            const firstFile = firstPlaylist.files[0];
+                            
+                            if (firstFile && firstFile.magnetUri) {
+                                // Разбиваем строку по "&ws=" и берем вторую часть
+                                let parts = firstFile.magnetUri.split("&ws=");
+                                if (parts.length > 1) {
+                                    let directUrl = decodeURIComponent(parts[1]);
+
+                                    // Ищем скрытую ссылку или создаем её динамически
+                                    let linkElement = document.querySelector(".video-link");
+                                    if(linkElement) {
+                                        linkElement.href = directUrl;
+                                        linkElement.setAttribute("download", "video.mp4");
+                                        linkElement.target = "_self"; 
+                                        //linkElement.click();
+
+                                        // ВТОРОЙ FETCH: Получаем сам файл
+                                            fetch(directUrl)
+                                                .then(res => {
+                                                    if (!res.ok) throw new Error('Ошибка сети при загрузке файла');
+                                                    return res.blob(); // Конвертируем в двоичные данные
+                                                })
+                                                .then(blob => {
+                                                    // Создаем внутреннюю URL-ссылку на этот Blob
+                                                    const blobUrl = window.URL.createObjectURL(blob);
+                                                    
+                                                    // Создаем временный элемент ссылки
+                                                    const a = document.createElement('a');
+                                                    a.style.display = 'none';
+                                                    a.href = blobUrl;
+                                                    
+                                                    // Извлекаем имя файла или даем стандартное
+                                                    const fileName = directUrl.split('/').pop() || 'video.mp4';
+                                                    a.download = fileName; 
+                                                    
+                                                    // Добавляем, кликаем и удаляем
+                                                    document.body.appendChild(a);
+                                                    a.click();
+                                                    
+                                                    // Чистим за собой память браузера
+                                                    window.URL.revokeObjectURL(blobUrl);
+                                                    document.body.removeChild(a);
+                                                    
+                                                    console.log('Скачивание запущено!');
+                                                })
+                                                .catch(err => {
+                                                    console.error('Ошибка Blob или CORS:', err);
+                                                    // Если сервер запретил fetch файла (CORS), 
+                                                    // откатываемся к обычному открытию в новой вкладке
+                                                    window.open(directUrl, '_blank');
+                                                });
+                                    }
+                                }
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching data:', error);
+                    });
+            }
+            }
+            else {
+                // Ссылка не распознана или не содержит видео
+            }
+        }
+    </script>
+
+</body>
+</html>
