@@ -74,14 +74,6 @@ function handlePlay(newLink = false) {
             let videoHash = urlParams.get('v');
 
             if (videoHash) {
-                //let apiUrl = `https://api.pocketnet.app/rpc/getposts?ids=${videoHash}`;
-                //let apiUrl = `https://corsproxy.io/?https://api.pocketnet.app/rpc/getposts?ids=${videoHash}`;
-                
-                //let targetUrl = encodeURIComponent(`https://api.pocketnet.app/rpc/getposts?ids=${videoHash}`);
-                //let apiUrl = `https://api.allorigins.win/get?url=${targetUrl}`;
-                
-                //let apiUrl = `https://api.allorigins.win/get?url=${encodeURIComponent('https://api.pocketnet.app/rpc/getposts?ids=' + videoHash)}`;
-
                 let targetUrl = `https://api.pocketnet.app/rpc/getposts?ids=${videoHash}`;
                 let apiUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
 
