@@ -128,7 +128,6 @@
 
             if (link.includes("bastyon.com")) {
             
-            let peertubeLink = "";    
             //let bastyonLink = "https://bastyon.com/index?video=1&v=83288116447662c81fdc47ab32c64303bb263f85a8b9221d97420a4109a82862";
             let urlParams = new URLSearchParams(new URL(link).search);
             let videoHash = urlParams.get('v');
@@ -158,90 +157,55 @@
 
                             if (videoInfo && videoInfo.host && videoInfo.id) {
                                 // Собираем ту самую ссылку
-                                peertubeLink = `https://${videoInfo.host}/w/${videoInfo.id}`;
+                                let peertubeLink = `https://${videoInfo.host}/w/${videoInfo.id}`;
                                 document.getElementById('linkInput').value = peertubeLink;
+                                startVideoDownload(peertubeLink);
                             }
                         }
                 });
             }
             
             }
-
             else if (link.includes("peertube")) {
+                startVideoDownload(link);
+            }
+        }
 
-            if (link) {
-                link = link.replace("/w/", "/api/v1/videos/");
-                
-                fetch(link)
-                    .then(response => response.json())
-                    .then(data => {
-                        const firstPlaylist = data.streamingPlaylists.find(p => p.files && p.files.length > 0);
-                        
-                        if (firstPlaylist) {
-                            const firstFile = firstPlaylist.files[0];
-                            
-                            if (firstFile && firstFile.magnetUri) {
-                                // Разбиваем строку по "&ws=" и берем вторую часть
-                                let parts = firstFile.magnetUri.split("&ws=");
-                                if (parts.length > 1) {
-                                    let directUrl = decodeURIComponent(parts[1]);
-
-                                    // Ищем скрытую ссылку или создаем её динамически
-                                    let linkElement = document.querySelector(".video-link");
-                                    if(linkElement) {
-                                        linkElement.href = directUrl;
-                                        linkElement.setAttribute("download", "video.mp4");
-                                        linkElement.target = "_self"; 
-                                        //linkElement.click();
-
-                                        // ВТОРОЙ FETCH: Получаем сам файл
-                                            fetch(directUrl)
-                                                .then(res => {
-                                                    if (!res.ok) throw new Error('Ошибка сети при загрузке файла');
-                                                    return res.blob(); // Конвертируем в двоичные данные
-                                                })
-                                                .then(blob => {
-                                                    // Создаем внутреннюю URL-ссылку на этот Blob
-                                                    const blobUrl = window.URL.createObjectURL(blob);
-                                                    
-                                                    // Создаем временный элемент ссылки
-                                                    const a = document.createElement('a');
-                                                    a.style.display = 'none';
-                                                    a.href = blobUrl;
-                                                    
-                                                    // Извлекаем имя файла или даем стандартное
-                                                    const fileName = directUrl.split('/').pop() || 'video.mp4';
-                                                    a.download = fileName; 
-                                                    
-                                                    // Добавляем, кликаем и удаляем
-                                                    document.body.appendChild(a);
-                                                    a.click();
-                                                    
-                                                    // Чистим за собой память браузера
-                                                    window.URL.revokeObjectURL(blobUrl);
-                                                    document.body.removeChild(a);
-                                                    
-                                                    console.log('Скачивание запущено!');
-                                                })
-                                                .catch(err => {
-                                                    console.error('Ошибка Blob или CORS:', err);
-                                                    // Если сервер запретил fetch файла (CORS), 
-                                                    // откатываемся к обычному открытию в новой вкладке
-                                                    window.open(directUrl, '_blank');
-                                                });
-                                    }
-                                }
+        // Выносим общую логику скачивания в отдельную функцию, чтобы не дублировать код
+        function startVideoDownload(peertubeLink) {
+            let apiUrl = peertubeLink.replace("/w/", "/api/v1/videos/");      
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    const firstPlaylist = data.streamingPlaylists.find(p => p.files && p.files.length > 0);
+                    if (firstPlaylist) {
+                        const firstFile = firstPlaylist.files[0];
+                        if (firstFile && firstFile.magnetUri) {
+                            let parts = firstFile.magnetUri.split("&ws=");
+                            if (parts.length > 1) {
+                                let directUrl = decodeURIComponent(parts[1]);
+                                
+                                // Логика Blob для принудительного скачивания
+                                fetch(directUrl)
+                                    .then(res => res.blob())
+                                    .then(blob => {
+                                        const blobUrl = window.URL.createObjectURL(blob);
+                                        const a = document.createElement('a');
+                                        a.href = blobUrl;
+                                        a.download = directUrl.split('/').pop() || 'video.mp4';
+                                        document.body.appendChild(a);
+                                        a.click();
+                                        window.URL.revokeObjectURL(blobUrl);
+                                        document.body.removeChild(a);
+                                    })
+                                    .catch(err => {
+                                        console.warn("CORS block on file, opening in new tab");
+                                        window.open(directUrl, '_blank');
+                                    });
                             }
                         }
-                    })
-                    .catch(error => {
-                        console.error('Error fetching data:', error);
-                    });
-            }
-            }
-            else {
-                // Ссылка не распознана или не содержит видео
-            }
+                    }
+                });
         }
     </script>
 
